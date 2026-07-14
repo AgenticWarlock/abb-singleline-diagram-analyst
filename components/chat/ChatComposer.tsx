@@ -1,0 +1,56 @@
+"use client";
+
+import { useState } from "react";
+import { Button, Textarea } from "@fluentui/react-components";
+import { Send24Regular } from "@fluentui/react-icons";
+import styles from "./ChatComposer.module.css";
+
+interface ChatComposerProps {
+  onSend: (text: string) => Promise<void>;
+  disabled?: boolean;
+}
+
+export function ChatComposer({ onSend, disabled = false }: ChatComposerProps) {
+  const [value, setValue] = useState("");
+
+  const handleSend = async () => {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return;
+    }
+
+    setValue("");
+    await onSend(trimmed);
+  };
+
+  return (
+    <div className={styles.composer}>
+      <label htmlFor="chat-input" className={styles.label}>
+        Mensaje
+      </label>
+      <Textarea
+        id="chat-input"
+        placeholder="Ejemplo: Quiero viajar a Roma"
+        value={value}
+        onChange={(_, data) => setValue(data.value)}
+        onKeyDown={async (event) => {
+          if (event.key === "Enter" && !event.shiftKey) {
+            event.preventDefault();
+            await handleSend();
+          }
+        }}
+        disabled={disabled}
+        resize="vertical"
+        aria-label="Escribe un mensaje para el agente"
+      />
+      <Button
+        appearance="primary"
+        icon={<Send24Regular />}
+        onClick={handleSend}
+        disabled={disabled}
+      >
+        Enviar
+      </Button>
+    </div>
+  );
+}

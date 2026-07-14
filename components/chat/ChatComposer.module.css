@@ -1,0 +1,9 @@
+.composer {
+  display: grid;
+  gap: 10px;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 600;
+}

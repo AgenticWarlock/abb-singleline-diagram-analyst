@@ -1,0 +1,13 @@
+.wrapper {
+  display: grid;
+  gap: 10px;
+}
+
+.list {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(255px, 290px);
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}

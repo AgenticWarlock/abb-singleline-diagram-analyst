@@ -1,0 +1,22 @@
+.wrapper {
+  height: 100%;
+  min-height: 620px;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding: 14px;
+}
+
+.selection {
+  color: #0f6cbd;
+}
+
+.destination {
+  opacity: 0.75;
+}
+
+@media (max-width: 960px) {
+  .wrapper {
+    min-height: 360px;
+  }
+}
