@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { CabinImage } from "@/lib/mock/cabins";
+import type { CabinImage } from "@/lib/mocks";
 import styles from "./CabinGalleryModal.module.css";
 
 interface CabinGalleryModalProps {

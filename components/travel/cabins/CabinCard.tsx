@@ -8,7 +8,7 @@ import {
   People20Regular,
   Warning20Regular,
 } from "@fluentui/react-icons";
-import type { Cabin } from "@/lib/mock/cabins";
+import type { Cabin } from "@/lib/mocks";
 import { CabinGallery } from "./CabinGallery";
 import styles from "./CabinCard.module.css";
 

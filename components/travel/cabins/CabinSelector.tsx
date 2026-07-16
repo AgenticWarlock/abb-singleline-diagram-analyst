@@ -2,7 +2,7 @@
 
 import { Body1, Caption1 } from "@fluentui/react-components";
 import { VehicleShip20Regular } from "@fluentui/react-icons";
-import { cabinCatalog } from "@/lib/mock/cabins";
+import { cabinCatalog } from "@/lib/mocks";
 import { CabinCard } from "./CabinCard";
 import styles from "./CabinSelector.module.css";
 

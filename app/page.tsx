@@ -3,14 +3,20 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { BrandVariants, createLightTheme, FluentProvider, Text } from "@fluentui/react-components";
-import { ChatPanel } from "@/components/chat/ChatPanel";
-import { TravelDateRangePicker } from "@/components/travel/TravelDateRangePicker";
-import { TravelPartySelector } from "@/components/travel/party/TravelPartySelector";
-import { CabinSelector } from "@/components/travel/cabins/CabinSelector";
-import type { AgentConnectionStatus, AgentTransport } from "@/lib/agent/AgentTransport";
-import { createAgentTransport, getConfiguredTransportMode } from "@/lib/agent/createTransport";
-import type { ChatMessageModel, FlightOption, ShowTravelPartySelectorPayload } from "@/lib/agent/eventTypes";
-import { cabinCatalog } from "@/lib/mock/cabins";
+import { ChatPanel } from "@/components/chat";
+import { TravelDateRangePicker } from "@/components/travel";
+import { TravelPartySelector } from "@/components/travel/party";
+import { CabinSelector } from "@/components/travel/cabins";
+import {
+  createAgentTransport,
+  getConfiguredTransportMode,
+  type AgentConnectionStatus,
+  type AgentTransport,
+  type ChatMessageModel,
+  type FlightOption,
+  type ShowTravelPartySelectorPayload,
+} from "@/lib/agent";
+import { cabinCatalog } from "@/lib/mocks";
 import styles from "./page.module.css";
 
 const trasmedBrand: BrandVariants = {

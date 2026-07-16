@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import type { CabinImage } from "@/lib/mock/cabins";
+import type { CabinImage } from "@/lib/mocks";
 import { CabinGalleryModal } from "./CabinGalleryModal";
 import styles from "./CabinGallery.module.css";
 

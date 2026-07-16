@@ -13,7 +13,7 @@ import type {
   FlightOption,
   UiToAgentEvent,
 } from "@/lib/agent/eventTypes";
-import { romeFlights } from "@/lib/mock/flights";
+import { romeFlights } from "@/lib/mocks";
 
 const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 

@@ -25,7 +25,7 @@ POC construida con Next.js (App Router), React y TypeScript estricto.
 - `components/chat/` componentes del chat.
 - `components/travel/` componentes de UI rica.
 - `lib/agent/` transporte, tipos y esquemas de eventos.
-- `lib/mock/` datos simulados.
+- `lib/mocks/` datos simulados.
 - `docs/` arquitectura y contrato de eventos.
 - `tests/` pruebas unitarias.
 
