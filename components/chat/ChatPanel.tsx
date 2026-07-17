@@ -37,6 +37,15 @@ const statusLabels: Record<AgentConnectionStatus, string> = {
   failed: "Error",
 };
 
+const statusClassNames: Record<AgentConnectionStatus, string> = {
+  online: styles.statusOnline,
+  connecting: styles.statusWarning,
+  reconnecting: styles.statusWarning,
+  disconnected: styles.statusError,
+  expired: styles.statusWarning,
+  failed: styles.statusError,
+};
+
 export function ChatPanel({ messages, isBusy, connectionStatus, onSendMessage, inlineContent }: ChatPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -53,7 +62,7 @@ export function ChatPanel({ messages, isBusy, connectionStatus, onSendMessage, i
             <Bot24Regular className={styles.botIcon} />
           </div>
           <div>
-            <Body1Strong className={styles.headerTitle}>Asistente Trasmed</Body1Strong>
+            <Body1Strong className={styles.headerTitle}>ASistente de reservas</Body1Strong>
             <span className={styles.headerSub}>Reserva tu ferry</span>
           </div>
         </div>
@@ -61,6 +70,7 @@ export function ChatPanel({ messages, isBusy, connectionStatus, onSendMessage, i
           appearance="filled"
           color={statusColors[connectionStatus]}
           size="small"
+          className={`${styles.statusBadge} ${statusClassNames[connectionStatus]}`}
         >
           {statusLabels[connectionStatus]}
         </Badge>
@@ -70,7 +80,7 @@ export function ChatPanel({ messages, isBusy, connectionStatus, onSendMessage, i
           <div className={styles.emptyState}>
             <span className={styles.emptyIcon}>⚓</span>
             <Body1Strong className={styles.emptyText}>
-              ¡Hola! Soy tu asistente de reservas Trasmed.
+              ¡Hola! Soy tu ASistente de reservas.
             </Body1Strong>
             <span className={styles.emptySub}>
               Cuéntame a dónde quieres viajar.
@@ -87,7 +97,7 @@ export function ChatPanel({ messages, isBusy, connectionStatus, onSendMessage, i
               <span className={styles.dot} />
               <span className={styles.dot} />
             </div>
-            <span className={styles.typingLabel}>Asistente Trasmed está escribiendo…</span>
+            <span className={styles.typingLabel}>ASistente de reservas está escribiendo…</span>
           </div>
         )}
         {inlineContent && (

@@ -1,6 +1,6 @@
 # copilotstudiorichui
 
-## TRASMED - POC Agencia de Viajes con Agente IA
+## ASistente de reservas - POC Agencia de Viajes con Agente IA
 
 POC construida con Next.js (App Router), React y TypeScript estricto.
 

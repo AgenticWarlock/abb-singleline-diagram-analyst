@@ -1,12 +1,17 @@
 @import "react-day-picker/dist/style.css";
 
 :root {
-  --trasmed-navy: #0d2656;
-  --trasmed-blue: #1a4a9e;
-  --trasmed-cyan: #00b4d8;
-  --trasmed-yellow: #f5c400;
-  --background: #eef4fb;
-  --foreground: #0d2656;
+  --brand-ink: #182435;
+  --brand-line: #d5deea;
+  --brand-muted: #6c7d93;
+  --brand-soft: #eef3f9;
+  --background: #f5f7fb;
+  --surface: #ffffff;
+  --foreground: #182435;
+  --accent: #2f6fb0;
+  --accent-soft: #ecf3fb;
+  --accent-aqua: #5fc7c8;
+  --shadow-soft: 0 10px 28px rgba(22, 38, 60, 0.1);
 }
 
 html {
@@ -24,10 +29,55 @@ body {
   display: flex;
   flex-direction: column;
   color: var(--foreground);
-  background: linear-gradient(160deg, #d6e8f7 0%, #eef4fb 40%, #f5f9ff 100%);
+  background:
+    linear-gradient(90deg, rgba(25, 40, 62, 0.02) 1px, transparent 1px) 0 0/46px 46px,
+    linear-gradient(rgba(25, 40, 62, 0.016) 1px, transparent 1px) 0 0/46px 46px,
+    var(--background);
   font-family: var(--font-geist-sans), "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  position: relative;
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  pointer-events: none;
+  border-radius: 999px;
+  filter: blur(42px);
+  z-index: -1;
+  opacity: 0.55;
+}
+
+body::before {
+  width: 380px;
+  height: 380px;
+  top: -120px;
+  left: -90px;
+  background: radial-gradient(circle at 35% 35%, rgba(95, 199, 200, 0.34) 0%, rgba(95, 199, 200, 0.04) 70%);
+  animation: ambientFloatA 18s ease-in-out infinite;
+}
+
+body::after {
+  width: 440px;
+  height: 440px;
+  right: -120px;
+  bottom: -180px;
+  background: radial-gradient(circle at 65% 45%, rgba(92, 145, 201, 0.28) 0%, rgba(92, 145, 201, 0.04) 72%);
+  animation: ambientFloatB 22s ease-in-out infinite;
+}
+
+@keyframes ambientFloatA {
+  0%,
+  100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(18px, 16px) scale(1.04); }
+}
+
+@keyframes ambientFloatB {
+  0%,
+  100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-16px, -14px) scale(1.05); }
 }
 
 main {
@@ -43,4 +93,15 @@ main {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

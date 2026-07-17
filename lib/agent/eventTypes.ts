@@ -72,9 +72,10 @@ export interface TravelPartySelectedPayload {
 export interface CabinSelectedPayload {
   cabinId: string;
   cabinName: string;
-  passengers: number;
-  hasPets: boolean;
-  priceDelta: number;
+  deck: number;
+  price: number;
+  currency: string;
+  petFriendly: boolean;
 }
 
 export type AgentToUiEvent =

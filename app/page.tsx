@@ -62,6 +62,8 @@ export default function Home() {
   // Cabin state
   const [showCabinSelector, setShowCabinSelector] = useState(false);
   const [cabinId, setCabinId] = useState<string | null>(null);
+  const [isSendingCabinSelection, setIsSendingCabinSelection] = useState(false);
+  const [sentCabinSelectionId, setSentCabinSelectionId] = useState<string | null>(null);
 
   const appendMessage = (message: ChatMessageModel) => {
     setMessages((prev) => [...prev, message]);
@@ -114,6 +116,7 @@ export default function Home() {
       if (event.type === "ui.showCabinSelector") {
         setCabinId(event.payload.cabinId);
         setShowCabinSelector(true);
+        setSentCabinSelectionId(null);
         setShowPartySelector(false);
         setShowDatePicker(false);
         setPanelError(null);
@@ -229,27 +232,56 @@ export default function Home() {
   };
 
   const onSelectCabin = async (selectedCabinId: string) => {
+    if (isSendingCabinSelection || sentCabinSelectionId === selectedCabinId) {
+      return;
+    }
+
     const cabin = cabinCatalog[selectedCabinId];
     if (!cabin) return;
-    setShowCabinSelector(false);
+
     setPanelError(null);
+    setIsSendingCabinSelection(true);
+
+    // 1) Update the UI first with a local selection card aligned to the right.
+    appendMessage(
+      createMessage(
+        "system",
+        `### Tu seleccion\n- Camarote: ${cabin.name}\n- Cubierta: ${cabin.deck}\n- Precio: +${cabin.priceDelta} EUR\n- Pet friendly: ${cabin.petFriendly ? "Si" : "No"}`,
+      ),
+    );
+
+    const eventPayload = {
+      cabinId: cabin.id,
+      cabinName: cabin.name,
+      deck: cabin.deck,
+      price: cabin.priceDelta,
+      currency: "EUR",
+      petFriendly: cabin.petFriendly,
+    };
+
+    console.info("[POC] Direct Line event", {
+      name: "ui.cabinSelected",
+      value: eventPayload,
+    });
 
     try {
       await transportRef.current?.sendEvent({
         type: "ui.cabinSelected",
-        payload: {
-          cabinId: cabin.id,
-          cabinName: cabin.name,
-          passengers,
-          hasPets,
-          priceDelta: cabin.priceDelta,
-        },
+        payload: eventPayload,
       });
-      appendMessage(createMessage("system",
-        `🛏️ ${cabin.name} · Cubierta ${cabin.deck} · +${cabin.priceDelta} €`
-      ));
+
+      setSentCabinSelectionId(selectedCabinId);
+      setShowCabinSelector(false);
     } catch {
-      setPanelError("No fue posible registrar la selección del camarote.");
+      setPanelError("No se pudo enviar la seleccion del camarote. Intentalo de nuevo.");
+      appendMessage(
+        createMessage(
+          "system",
+          "No se pudo enviar la seleccion al agente. Vuelve a intentarlo.",
+        ),
+      );
+    } finally {
+      setIsSendingCabinSelection(false);
     }
   };
 
@@ -276,7 +308,7 @@ export default function Home() {
           <div className={styles.headerBrand}>
             <span className={styles.headerLogo}>⚓</span>
             <div>
-              <Text className={styles.headerTitle}>Trasmed</Text>
+              <Text className={styles.headerTitle}>ASistente de reservas</Text>
               <Text className={styles.headerSub}>Asistente de reservas · {transportMode}</Text>
             </div>
           </div>
@@ -314,6 +346,7 @@ export default function Home() {
                     passengers={passengers}
                     hasPets={hasPets}
                     onSelect={onSelectCabin}
+                    disabled={isSendingCabinSelection}
                   />
                 ) : undefined
               }

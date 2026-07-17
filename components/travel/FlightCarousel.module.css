@@ -1,6 +1,12 @@
 .wrapper {
   display: grid;
   gap: 10px;
+  animation: railIn 0.28s ease-out;
+}
+
+@keyframes railIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .list {
@@ -10,4 +16,18 @@
   gap: 10px;
   overflow-x: auto;
   padding-bottom: 8px;
+  scrollbar-width: thin;
+}
+
+.list::-webkit-scrollbar {
+  height: 7px;
+}
+
+.list::-webkit-scrollbar-thumb {
+  background: rgba(30, 50, 75, 0.2);
+  border-radius: 999px;
+}
+
+.list::-webkit-scrollbar-thumb:hover {
+  background: rgba(47, 111, 176, 0.35);
 }

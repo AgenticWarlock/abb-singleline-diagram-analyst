@@ -1,14 +1,22 @@
 .message {
   max-width: 80%;
   border-radius: 16px;
-  padding: 10px 14px;
-  box-shadow: 0 1px 3px rgba(13, 38, 86, 0.08);
+  padding: 11px 14px;
+  box-shadow: 0 3px 10px rgba(20, 35, 55, 0.06);
+  line-height: 1.45;
   word-break: break-word;
+  animation: bubbleIn 0.26s ease-out;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+
+@keyframes bubbleIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .role {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
@@ -21,7 +29,7 @@
 }
 
 .content :global(p + p) {
-  margin-top: 8px;
+  margin-top: 9px;
 }
 
 .content :global(ul),
@@ -58,9 +66,10 @@
 /* User bubble - navy Trasmed */
 .user {
   margin-left: auto;
-  background: linear-gradient(135deg, #0d2656 0%, #1a4a9e 100%);
+  background: linear-gradient(165deg, #4e8ec9 0%, #2f6fb0 78%);
   color: #ffffff;
   border-bottom-right-radius: 4px;
+  box-shadow: 0 7px 16px rgba(47, 111, 176, 0.22);
 }
 
 .user .role {
@@ -75,21 +84,42 @@
 .agent {
   margin-right: auto;
   background: #ffffff;
-  border: 1px solid rgba(13, 38, 86, 0.12);
-  color: #0d2656;
+  border: 1px solid rgba(21, 36, 57, 0.1);
+  color: #1c2b42;
   border-bottom-left-radius: 4px;
 }
 
-.agent .role {
-  color: #1a4a9e;
+.agent:hover {
+  border-color: rgba(60, 111, 170, 0.3);
+  box-shadow: 0 6px 14px rgba(20, 35, 55, 0.1);
 }
 
-/* System bubble - yellow Trasmed */
+.agent .role {
+  color: #4f6f93;
+}
+
+/* System bubble - compact structured confirmation */
 .system {
-  margin-right: auto;
-  background: #fffbe6;
-  border: 1px solid rgba(245, 196, 0, 0.5);
-  color: #5a4000;
-  border-radius: 10px;
-  font-size: 13px;
+  align-self: flex-end;
+  margin-left: auto;
+  background: linear-gradient(180deg, #eff5fc, #e8f0fb);
+  border: 1px solid #c8d9ec;
+  color: #264867;
+  border-radius: 12px;
+  font-size: 12px;
+  padding: 8px 11px;
+  box-shadow: none;
+  max-width: 86%;
+}
+
+.system .role {
+  margin-bottom: 4px;
+  color: #3f648c;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .message {
+    animation: none !important;
+    transition: none !important;
+  }
 }

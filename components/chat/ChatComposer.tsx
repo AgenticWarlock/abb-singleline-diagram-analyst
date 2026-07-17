@@ -43,13 +43,15 @@ export function ChatComposer({ onSend, disabled = false }: ChatComposerProps) {
         resize="none"
         rows={2}
         aria-label="Escribe un mensaje para el agente"
+        className={styles.input}
         style={{ gridColumn: "1 / 2", gridRow: "2" }}
       />
       <Button
-        appearance="primary"
+        appearance="secondary"
         icon={<Send24Regular />}
         onClick={handleSend}
         disabled={disabled}
+        className={styles.sendButton}
         style={{ gridColumn: "2 / 3", gridRow: "2", alignSelf: "end" }}
       >
         Enviar

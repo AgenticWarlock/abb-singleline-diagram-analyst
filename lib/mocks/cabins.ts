@@ -10,6 +10,7 @@ export interface Cabin {
   deck: number;
   beds: string;
   priceDelta: number;
+  petFriendly: boolean;
   availability: number;
   tags: string[];
   features: string[];
@@ -23,6 +24,7 @@ export const petFriendlyCabin: Cabin = {
   deck: 8,
   beds: "2 camas individuales",
   priceDelta: 95,
+  petFriendly: true,
   availability: 1,
   tags: ["Pet friendly", "Último disponible"],
   features: [

@@ -7,8 +7,9 @@
   position: relative;
   border-radius: 10px;
   overflow: hidden;
-  background: #0d2656;
+  background: #172b45;
   aspect-ratio: 16/9;
+  box-shadow: 0 8px 18px rgba(22, 39, 62, 0.24);
 }
 
 .mainBtn {
@@ -30,14 +31,14 @@
 }
 
 .mainBtn:hover .mainImg {
-  transform: scale(1.02);
+  transform: scale(1.03);
 }
 
 .zoomHint {
   position: absolute;
   bottom: 10px;
   right: 10px;
-  background: rgba(13, 38, 86, 0.7);
+  background: rgba(25, 43, 69, 0.72);
   color: white;
   width: 32px;
   height: 32px;
@@ -60,7 +61,7 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(13, 38, 86, 0.65);
+  background: rgba(25, 43, 69, 0.68);
   color: white;
   border: none;
   border-radius: 50%;
@@ -72,12 +73,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s;
+  transition: background 0.15s, transform 0.15s;
   z-index: 2;
 }
 
 .navBtn:hover {
-  background: rgba(13, 38, 86, 0.9);
+  background: rgba(25, 43, 69, 0.9);
+  transform: translateY(-50%) scale(1.04);
 }
 
 .navPrev { left: 8px; }
@@ -88,7 +90,7 @@
   position: absolute;
   top: 10px;
   right: 10px;
-  background: rgba(13, 38, 86, 0.65);
+  background: rgba(25, 43, 69, 0.72);
   color: white;
   font-size: 12px;
   font-weight: 600;
@@ -112,17 +114,27 @@
   padding: 0;
   cursor: pointer;
   background: none;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, transform 0.15s;
   flex-shrink: 0;
 }
 
 .thumb:hover {
-  border-color: #00b4d8;
+  border-color: #7ca9d7;
+  transform: translateY(-1px);
 }
 
 .thumbActive {
-  border-color: #1a4a9e;
-  box-shadow: 0 0 0 2px rgba(26, 74, 158, 0.3);
+  border-color: #3d7fbe;
+  box-shadow: 0 0 0 2px rgba(61, 127, 190, 0.24);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mainImg,
+  .navBtn,
+  .thumb {
+    transition: none !important;
+    transform: none !important;
+  }
 }
 
 .thumbImg {

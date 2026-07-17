@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>M365 Copilot + Model-driven Apps</title>
+  <style>
+    :root{
+      --bg:#f7f7f5;
+      --ink:#0b0b0b;
+      --muted:#5b5b5b;
+      --line:#141414;
+      --soft:#e7e5df;
+      --paper:#ffffff;
+      --accent:#000000;
+      --max:1220px;
+      --nav:276px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family: "Segoe UI", Inter, Arial, sans-serif;
+      background:
+        linear-gradient(90deg, rgba(0,0,0,.045) 1px, transparent 1px) 0 0/42px 42px,
+        linear-gradient(rgba(0,0,0,.035) 1px, transparent 1px) 0 0/42px 42px,
+        var(--bg);
+      color:var(--ink);
+      overflow-x:hidden;
+    }
+    a{color:inherit;text-decoration:none;border-bottom:1px solid currentColor}
+    .particle-field{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+    .particle{position:absolute;width:6px;height:6px;border:1px solid rgba(0,0,0,.16);background:rgba(255,255,255,.2);opacity:.42;animation:float var(--dur,18s) ease-in-out infinite;animation-delay:var(--delay,0s);will-change:transform,opacity}
+    .particle.dot{width:3px;height:3px;border:0;background:rgba(0,0,0,.16)}
+    .particle.soft{border-color:rgba(0,0,0,.1);opacity:.28}
+    @keyframes float{
+      0%{transform:translate3d(0,0,0) rotate(0deg);opacity:.08}
+      20%{opacity:.34}
+      50%{transform:translate3d(var(--dx,28px),var(--dy,-60px),0) rotate(90deg);opacity:.22}
+      80%{opacity:.3}
+      100%{transform:translate3d(calc(var(--dx,28px) * -0.35),calc(var(--dy,-60px) * -1.45),0) rotate(180deg);opacity:.06}
+    }
+    .frame{display:grid;grid-template-columns:var(--nav) minmax(0,1fr);min-height:100vh;position:relative;z-index:1}
+    nav{
+      position:fixed;inset:0 auto 0 0;width:var(--nav);
+      background:rgba(247,247,245,.96);backdrop-filter:blur(10px);
+      border-right:1px solid var(--line);padding:28px 22px;z-index:10;
+      display:flex;flex-direction:column;gap:28px;
+    }
+    .brand{border:1px solid var(--line);background:#fff;padding:18px 16px;display:grid;gap:10px}
+        .brand .title{font-size:20px;line-height:1.08;font-weight:650;letter-spacing:-.03em}
+    .brand .meta{font-size:11px;color:var(--muted);line-height:1.4;border-top:1px solid var(--line);padding-top:10px}
+    .navlinks{display:grid;gap:6px;overflow:auto;padding-right:2px}
+    .navlinks a{border:1px solid transparent;padding:9px 10px;font-size:12px;line-height:1.25;color:var(--muted);display:grid;grid-template-columns:34px 1fr;align-items:start;gap:10px}
+    .navlinks a span:first-child{font-family:Consolas,monospace;color:var(--ink)}
+    .navlinks a.active,.navlinks a:hover{border-color:var(--line);background:#fff;color:var(--ink)}
+    .navfoot{margin-top:auto;font-size:11px;color:var(--muted);line-height:1.45;border-top:1px solid var(--line);padding-top:14px}
+    main{grid-column:2;padding:0 0 0 0}
+    .progress{position:fixed;left:var(--nav);right:0;top:0;height:3px;background:transparent;z-index:20}
+    .bar{height:100%;width:0;background:#000}
+    section.slide{
+      min-height:100vh;
+      display:grid;align-items:center;
+      padding:72px 64px;
+      border-bottom:1px solid var(--line);
+      position:relative;
+    }
+    .inner{max-width:var(--max);width:100%;margin:0 auto;position:relative}
+    .kicker{font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin-bottom:22px}
+    h1,h2,h3,p{margin:0}
+    h1{font-size:clamp(58px,7.4vw,112px);line-height:.88;letter-spacing:-.075em;font-weight:680;max-width:980px}
+    h2{font-size:clamp(38px,4.2vw,64px);line-height:.95;letter-spacing:-.06em;font-weight:650;max-width:950px}
+    h3{font-size:22px;line-height:1.05;letter-spacing:-.035em;font-weight:650}
+    .lead{font-size:clamp(21px,2vw,30px);line-height:1.22;letter-spacing:-.032em;max-width:920px;color:#222;margin-top:26px}
+    .sublead{font-size:18px;line-height:1.45;color:var(--muted);max-width:780px;margin-top:18px}
+    .small{font-size:13px;line-height:1.45;color:var(--muted)}
+    .micro{font-size:11px;line-height:1.35;color:var(--muted)}
+    .grid{display:grid;gap:16px;margin-top:38px}
+    .cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .card{background:rgba(255,255,255,.84);border:1px solid var(--line);padding:22px;min-height:165px;display:flex;flex-direction:column;gap:14px;position:relative}
+    .card.tall{min-height:235px}
+    .card.compact{min-height:auto;padding:18px}
+    .card::before{content:"";position:absolute;left:-1px;top:-1px;width:18px;height:18px;border-left:3px solid #000;border-top:3px solid #000}
+    .num{font-family:Consolas,monospace;font-size:13px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+    .tag{display:inline-flex;align-items:center;height:26px;padding:0 9px;border:1px solid var(--line);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:#fff;width:max-content}
+    .status{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+    .status .tag{background:transparent}
+    ul.clean{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+    ul.clean li{position:relative;padding-left:18px;font-size:15px;line-height:1.35;color:#262626}
+    ul.clean li::before{content:"";position:absolute;left:0;top:.58em;width:6px;height:6px;background:#000}
+    .rule{height:1px;background:#000;margin:36px 0}
+    .matrix{display:grid;grid-template-columns:1.2fr .85fr .85fr .85fr;gap:0;border:1px solid #000;background:#000;margin-top:36px}
+    .matrix > div{background:#fff;padding:16px;border-right:1px solid #000;border-bottom:1px solid #000;min-height:68px;font-size:13px;line-height:1.35}
+    .matrix > div:nth-child(4n){border-right:0}.matrix > div:nth-last-child(-n+4){border-bottom:0}
+    .matrix .head{background:#0b0b0b;color:#fff;text-transform:uppercase;letter-spacing:.14em;font-size:11px}.matrix strong{font-size:15px}
+    .diagram{display:grid;grid-template-columns:1fr 58px 1fr 58px 1fr;align-items:center;gap:0;margin-top:42px}
+    .node{border:1px solid #000;background:#fff;padding:22px;min-height:164px;display:grid;align-content:start;gap:12px}
+    .arrow{height:1px;background:#000;position:relative}.arrow::after{content:"";position:absolute;right:0;top:-5px;width:10px;height:10px;border-top:1px solid #000;border-right:1px solid #000;transform:rotate(45deg);background:var(--bg)}
+    .stack{display:grid;gap:14px;margin-top:38px}.layer{display:grid;grid-template-columns:220px 1fr;gap:18px;border:1px solid #000;background:#fff;min-height:86px}.layer .label{background:#0b0b0b;color:#fff;padding:18px;font-size:12px;letter-spacing:.16em;text-transform:uppercase}.layer .body{padding:18px;display:flex;align-items:center;font-size:16px;line-height:1.35}
+    .sources{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}.src{font-size:11px;border:1px solid #000;padding:7px 9px;background:#fff;color:#000}.src:hover{background:#000;color:#fff}
+    .slide-no{position:absolute;right:34px;bottom:28px;font-family:Consolas,monospace;font-size:12px;color:var(--muted)}
+    .stamp{position:absolute;right:64px;top:64px;border:1px solid #000;padding:10px 12px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;background:#fff}
+    .bigline{font-size:clamp(34px,4.8vw,78px);line-height:.98;letter-spacing:-.07em;font-weight:650;max-width:1100px;margin-top:28px}
+    .split{display:grid;grid-template-columns:1.08fr .92fr;gap:36px;align-items:start;margin-top:36px}.quote{border-left:3px solid #000;padding-left:22px;font-size:28px;line-height:1.12;letter-spacing:-.045em}
+    .source-list{display:grid;gap:10px;margin-top:34px}.source-row{border:1px solid #000;background:#fff;padding:14px 16px;display:grid;grid-template-columns:210px 1fr;gap:20px}.source-row b{font-size:13px;letter-spacing:.06em;text-transform:uppercase}.source-row a{font-size:14px;line-height:1.35;border-bottom:0;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+    .agenda{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-top:38px}.agenda .step{border:1px solid #000;background:#fff;min-height:150px;padding:16px;display:grid;align-content:start;gap:12px}.agenda .step b{font-family:Consolas,monospace;font-size:14px}.agenda .step p{font-size:13px;line-height:1.35;color:#333}
+    .note{border:1px solid #000;background:#fff;padding:18px;margin-top:20px;font-size:14px;line-height:1.45;color:#262626}.note strong{font-weight:700}
+    @media(max-width:980px){.frame{display:block}nav{position:sticky;top:0;width:100%;height:auto;padding:12px 14px;border-right:0;border-bottom:1px solid #000}.brand{display:none}.navlinks{display:flex;overflow:auto}.navlinks a{min-width:160px;grid-template-columns:1fr}.navlinks a span:first-child{display:none}.navfoot{display:none}.progress{left:0}main{grid-column:auto}section.slide{padding:58px 22px}.cols-2,.cols-3,.cols-4,.agenda{grid-template-columns:1fr}.diagram{grid-template-columns:1fr;gap:12px}.arrow{height:24px;width:1px;margin:auto}.arrow::after{right:-5px;top:auto;bottom:0;transform:rotate(135deg)}.split{grid-template-columns:1fr}.matrix{grid-template-columns:1fr}.matrix>div{border-right:0}.matrix .head:not(:first-child){display:none}.layer{grid-template-columns:1fr}.source-row{grid-template-columns:1fr}.stamp{position:static;width:max-content;margin-bottom:20px}.slide-no{display:none}}
+    @media print{body{background:#fff}.frame{display:block}nav,.progress{display:none}section.slide{min-height:100vh;break-after:page;padding:42px;border-bottom:0}.slide-no{display:block}}
+  </style>
+</head>
+<body>
+  <div class="particle-field" id="particleField" aria-hidden="true"></div>
+  <div class="progress"><div class="bar" id="bar"></div></div>
+  <div class="frame">
+    <nav>
+      <div class="brand">
+        <div class="title">M365 Copilot + Model-driven Apps</div>
+        <div class="meta">Deck HTML · julio 2026 · Microsoft Learn como fuente principal</div>
+      </div>
+      <div class="navlinks" id="navlinks">
+        <a href="#s00"><span>00</span><span>Contexto</span></a>
+        <a href="#s01"><span>01</span><span>Mapa de capacidades</span></a>
+        <a href="#s02"><span>1</span><span>Dataverse como knowledge</span></a>
+        <a href="#s03"><span>2</span><span>App MCP: la app dentro de Copilot</span></a>
+        <a href="#s04"><span>2A</span><span>App MCP: flujo operativo</span></a>
+        <a href="#s05"><span>3</span><span>Dataverse MCP</span></a>
+        <a href="#s06"><span>4</span><span>Power Apps MCP + agent feed</span></a>
+        <a href="#s07"><span>5.9</span><span>Agent Response en formularios</span></a>
+        <a href="#s08"><span>6</span><span>Dataverse Intelligence</span></a>
+        <a href="#s09"><span>7</span><span>Business skills</span></a>
+        <a href="#s10"><span>ARCH</span><span>Arquitectura propuesta</span></a>
+        <a href="#s11"><span>90D</span><span>Plan de adopción</span></a>
+        <a href="#s12"><span>!</span><span>Consideraciones</span></a>
+        <a href="#s13"><span>REF</span><span>Fuentes oficiales</span></a>
+      </div>
+      <div class="navfoot">Usar ← / → para navegar. Cada bloque contiene enlaces a documentación oficial.</div>
+    </nav>
+
+    <main>
+      <section class="slide" id="s00">
+        <div class="inner">
+          <div class="stamp">Reusable deck</div>
+          <div class="kicker">Evolución de una Model-driven app existente</div>
+          <h1>M365 Copilot sobre Dataverse</h1>
+          <p class="lead">Qué capacidades se han desbloqueado para convertir una aplicación Model-driven en una superficie agéntica: conocimiento, herramientas, formularios, supervisión y semántica empresarial.</p>
+          <div class="status">
+            <span class="tag">Sobrio</span><span class="tag">Microsoft 365 Copilot</span><span class="tag">Power Apps</span><span class="tag">Dataverse</span><span class="tag">MCP</span>
+          </div>
+        </div>
+        <div class="slide-no">00</div>
+      </section>
+
+      <section class="slide" id="s01">
+        <div class="inner">
+          <div class="kicker">Mapa de lectura</div>
+          <h2>La novedad no es “un chat”: es abrir la app a agentes.</h2>
+          <p class="sublead">Los bloques seleccionados cubren las capacidades con más impacto sobre una Model-driven app ya construida: Dataverse como conocimiento, App MCP, Dataverse MCP, Power Apps MCP, Agent Response, Dataverse Intelligence y Business Skills.</p>
+          <div class="agenda">
+            <div class="step"><b>1</b><h3>Knowledge</h3><p>Tablas de Dataverse como base de conocimiento para agentes.</p></div>
+            <div class="step"><b>2</b><h3>App MCP</h3><p>La propia Model-driven se convierte en agente declarativo para M365 Copilot.</p></div>
+            <div class="step"><b>3</b><h3>Dataverse MCP</h3><p>Dataverse expone datos y operaciones como servidor MCP.</p></div>
+            <div class="step"><b>4</b><h3>Power Apps MCP</h3><p>Supervisión humana de agentes desde la propia aplicación.</p></div>
+            <div class="step"><b>5.9</b><h3>Agent Response</h3><p>Respuestas de agentes embebidas en formularios.</p></div>
+            <div class="step"><b>6</b><h3>Semantic model</h3><p>Capa semántica para que Copilot entienda el negocio.</p></div>
+            <div class="step"><b>7</b><h3>Skills</h3><p>Reglas y procesos reutilizables para agentes.</p></div>
+          </div>
+        </div>
+        <div class="slide-no">01</div>
+      </section>
+
+      <section class="slide" id="s02">
+        <div class="inner">
+          <div class="kicker">1 · Dataverse como knowledge</div>
+          <h2>El agente puede responder sobre registros reales, no solo sobre documentos.</h2>
+          <div class="split">
+            <div>
+              <p class="quote">Dataverse se puede añadir como fuente de conocimiento en Copilot Studio para fundamentar respuestas con datos de tablas.</p>
+              <div class="note"><strong>Aplicación típica:</strong> ideal para preguntas sobre clientes, incidencias, activos, solicitudes, estados, histórico y relaciones entre entidades, sin crear primero una API específica.</div>
+            </div>
+            <div class="grid">
+              <div class="card compact"><div class="num">Desbloquea</div><ul class="clean"><li>Consultas en lenguaje natural sobre tablas.</li><li>Uso de relaciones y registros relacionados.</li><li>Sinónimos y glosario para nombres técnicos.</li><li>Seguridad basada en permisos del usuario.</li></ul></div>
+              <div class="card compact"><div class="num">Límites</div><ul class="clean"><li>Requiere autenticación Microsoft.</li><li>Necesita Dataverse Search.</li><li>El límite documentado es de fuentes y tablas por agente.</li><li>La calidad depende de nombres, descripciones y relaciones.</li></ul></div>
+            </div>
+          </div>
+          <div class="sources">
+            <a class="src" href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-add-dataverse" target="_blank">Add Dataverse tables as knowledge</a>
+            <a class="src" href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-copilot-studio" target="_blank">Knowledge sources summary</a>
+            <a class="src" href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/data-platform-copilot" target="_blank">Improve Copilot responses from Dataverse</a>
+          </div>
+        </div>
+        <div class="slide-no">1</div>
+      </section>
+
+      <section class="slide" id="s03">
+        <div class="inner">
+          <div class="kicker">2 · App MCP · Capacidad prioritaria</div>
+          <h2>La Model-driven app puede publicarse como experiencia operativa en Microsoft 365 Copilot.</h2>
+          <p class="lead">Con App MCP, Power Apps crea un servidor MCP asociado a la aplicación y un agente declarativo que expone vistas, formularios y herramientas a Copilot.</p>
+          <div class="grid cols-4">
+            <div class="card tall"><div class="num">01</div><h3>Consultar</h3><p class="small">Copilot puede recuperar filas de las tablas incluidas en la app y responder con contexto.</p></div>
+            <div class="card tall"><div class="num">02</div><h3>Visualizar</h3><p class="small">Puede mostrar grids, formularios y widgets MCP en la conversación.</p></div>
+            <div class="card tall"><div class="num">03</div><h3>Operar</h3><p class="small">Puede guiar creación y edición de registros usando la experiencia de la app.</p></div>
+            <div class="card tall"><div class="num">04</div><h3>Extender</h3><p class="small">Puede añadirse lógica propia mediante herramientas MCP personalizadas.</p></div>
+          </div>
+          <div class="rule"></div>
+          <div class="bigline">La app deja de ser solo una pantalla: pasa a ser una herramienta que Copilot puede invocar.</div>
+          <div class="sources"><a class="src" href="https://learn.microsoft.com/en-us/power-apps/maker/model-driven-apps/enable-your-app-copilot" target="_blank">Enable your app and custom tools in Microsoft 365 Copilot</a></div>
+        </div>
+        <div class="slide-no">2</div>
+      </section>
+
+      <section class="slide" id="s04">
+        <div class="inner">
+          <div class="kicker">2A · App MCP · Flujo de uso</div>
+          <h2>Del correo o reunión al registro en Dataverse, sin obligar al usuario a navegar por la app.</h2>
+          <div class="diagram">
+            <div class="node"><div class="num">Entrada</div><h3>Microsoft 365 Copilot</h3><p class="small">Usuario pregunta desde Chat, Teams, Outlook o una experiencia de Copilot habilitada.</p></div>
+            <div class="arrow"></div>
+            <div class="node"><div class="num">Orquestación</div><h3>Agente declarativo + App MCP</h3><p class="small">El agente decide qué vista, formulario o herramienta de la app debe invocar.</p></div>
+            <div class="arrow"></div>
+            <div class="node"><div class="num">Acción</div><h3>Model-driven app / Dataverse</h3><p class="small">Se consultan, muestran o preparan operaciones sobre registros respetando seguridad.</p></div>
+          </div>
+          <div class="grid cols-3">
+            <div class="card compact"><h3>Ejemplo 1</h3><p class="small">“Muéstrame las solicitudes críticas abiertas y abre las que no tienen responsable.”</p></div>
+            <div class="card compact"><h3>Ejemplo 2</h3><p class="small">“Crea un borrador de incidencia con este correo y déjalo listo para revisión.”</p></div>
+            <div class="card compact"><h3>Ejemplo 3</h3><p class="small">“Resume los activos de este cliente y genera una tabla de riesgos.”</p></div>
+          </div>
+          <div class="note"><strong>Decisión recomendada:</strong> pilotar App MCP primero sobre una app acotada, con pocas tablas críticas, formularios claros y un proceso de negocio concreto.</div>
+        </div>
+        <div class="slide-no">2A</div>
+      </section>
+
+      <section class="slide" id="s05">
+        <div class="inner">
+          <div class="kicker">3 · Dataverse MCP</div>
+          <h2>Dataverse como servidor MCP: datos, esquemas y operaciones para agentes.</h2>
+          <p class="sublead">A diferencia de App MCP, que se centra en una aplicación, Dataverse MCP expone capacidades del entorno Dataverse a clientes MCP como Copilot Studio, GitHub Copilot, VS Code o herramientas compatibles.</p>
+          <div class="matrix">
+            <div class="head">Capacidad</div><div class="head">Qué permite</div><div class="head">Uso recomendado</div><div class="head">Control</div>
+            <div><strong>search_data</strong></div><div>Buscar datos estructurados y no estructurados.</div><div>Encontrar registros aunque el usuario no conozca la tabla.</div><div>Permisos Dataverse.</div>
+            <div><strong>read_query</strong></div><div>Ejecutar consultas SELECT soportadas.</div><div>Listados, filtros complejos y análisis operativo.</div><div>Solo lectura.</div>
+            <div><strong>create / update</strong></div><div>Crear o modificar filas.</div><div>Automatizar tareas transaccionales bajo control.</div><div>Validaciones y seguridad.</div>
+            <div><strong>delete</strong></div><div>Eliminar filas.</div><div>Casos muy restringidos.</div><div>Requiere aprobación explícita.</div>
+          </div>
+          <div class="sources"><a class="src" href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/data-platform-mcp" target="_blank">Connect to Dataverse with MCP</a></div>
+        </div>
+        <div class="slide-no">3</div>
+      </section>
+
+      <section class="slide" id="s06">
+        <div class="inner">
+          <div class="kicker">4 · Power Apps MCP + agent feed</div>
+          <h2>Los agentes pueden trabajar; el usuario supervisa dentro de la Model-driven.</h2>
+          <div class="split">
+            <div>
+              <p class="lead">Power Apps MCP añade un patrón de “human-in-the-loop”: el agente no desaparece en segundo plano; deja tareas, solicitudes y revisiones dentro de la app.</p>
+              <div class="note"><strong>Valor principal:</strong> procesos con datos sensibles o incompletos pueden beneficiarse de IA sin perder control operacional.</div>
+            </div>
+            <div class="grid">
+              <div class="card compact"><div class="num">log_for_review</div><p class="small">Registrar acciones completadas para revisión.</p></div>
+              <div class="card compact"><div class="num">request_assistance</div><p class="small">Pedir intervención humana cuando el agente no debe decidir solo.</p></div>
+              <div class="card compact"><div class="num">invoke_data_entry</div><p class="small">Convertir documentos, correos o texto en sugerencias de formulario.</p></div>
+            </div>
+          </div>
+          <div class="sources">
+            <a class="src" href="https://learn.microsoft.com/en-us/power-apps/maker/model-driven-apps/power-apps-mcp-server" target="_blank">Work with Power Apps MCP server</a>
+            <a class="src" href="https://learn.microsoft.com/en-us/power-apps/user/supervise-agents-with-agent-feed" target="_blank">Supervise agents with agent feed</a>
+            <a class="src" href="https://learn.microsoft.com/en-us/power-apps/maker/common/faq-power-apps-mcp-server-invoke-data-entry" target="_blank">FAQ invoke_data_entry</a>
+          </div>
+        </div>
+        <div class="slide-no">4</div>
+      </section>
+
+      <section class="slide" id="s07">
+        <div class="inner">
+          <div class="kicker">5.9 · Agent Response</div>
+          <h2>Respuestas de agentes embebidas en el formulario, con contexto del registro.</h2>
+          <p class="sublead">El componente Agent Response permite ejecutar un topic de Copilot Studio desde un formulario Model-driven y mostrar la respuesta directamente en la experiencia del usuario.</p>
+          <div class="grid cols-3">
+            <div class="card tall"><div class="num">Contexto implícito</div><h3>App + página + registro</h3><p class="small">El agente recibe contexto del entorno donde está el usuario.</p></div>
+            <div class="card tall"><div class="num">Salida rica</div><h3>Markdown / Adaptive Cards</h3><p class="small">Permite respuestas estructuradas, recomendaciones, paneles y acciones.</p></div>
+            <div class="card tall"><div class="num">Uso directo</div><h3>Bloques de inteligencia</h3><p class="small">Riesgo, resumen, siguiente acción, cumplimiento, documentación faltante.</p></div>
+          </div>
+          <div class="note"><strong>Patrón recomendado:</strong> empezar con un componente “Resumen + recomendación” en la entidad más crítica, sin automatizar escritura hasta validar calidad.</div>
+          <div class="sources">
+            <a class="src" href="https://learn.microsoft.com/en-us/power-apps/maker/model-driven-apps/form-designer-add-configure-agent-response" target="_blank">Add agent response using form designer</a>
+            <a class="src" href="https://learn.microsoft.com/en-us/power-platform/release-plan/2025wave1/power-apps/bring-intelligence-model-driven-apps-low-code-agents" target="_blank">Low-code agents in model-driven apps</a>
+            <a class="src" href="https://learn.microsoft.com/en-us/power-platform/release-plan/2025wave1/power-apps/bring-intelligence-into-model-driven-apps-custom-components-using-agent-xrm-pcf-apis" target="_blank">Agent XRM / PCF APIs</a>
+          </div>
+        </div>
+        <div class="slide-no">5.9</div>
+      </section>
+
+      <section class="slide" id="s08">
+        <div class="inner">
+          <div class="kicker">6 · Dataverse Intelligence / Semantic Model</div>
+          <h2>La calidad del modelo de datos empieza a ser calidad de IA.</h2>
+          <p class="lead">Dataverse semantic model da a Copilot y a los agentes una comprensión empresarial compartida: no solo nombres técnicos de columnas, sino significado, relaciones, vistas, formularios y señales semánticas.</p>
+          <div class="grid cols-3">
+            <div class="card"><div class="num">Señales</div><ul class="clean"><li>Tablas y columnas.</li><li>Relaciones.</li><li>Vistas públicas.</li><li>Formularios.</li><li>Descripciones.</li></ul></div>
+            <div class="card"><div class="num">Gobierno</div><ul class="clean"><li>Excluir ruido.</li><li>Afinar señales.</li><li>Documentar términos.</li><li>Validar respuestas.</li><li>Preparar datos sensibles.</li></ul></div>
+            <div class="card"><div class="num">Impacto</div><ul class="clean"><li>Mejores respuestas.</li><li>Menos ambigüedad.</li><li>Mejor recuperación.</li><li>Mayor confianza.</li><li>Menos prompts correctivos.</li></ul></div>
+          </div>
+          <div class="sources">
+            <a class="src" href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/semantic-model-overview" target="_blank">Dataverse semantic model overview</a>
+            <a class="src" href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/fine-tune-semantic-model-signals" target="_blank">Fine-tune semantic model signals</a>
+            <a class="src" href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/data-platform-intelligence" target="_blank">What is Dataverse intelligence?</a>
+          </div>
+        </div>
+        <div class="slide-no">6</div>
+      </section>
+
+      <section class="slide" id="s09">
+        <div class="inner">
+          <div class="kicker">7 · Business skills</div>
+          <h2>Las reglas del negocio dejan de vivir repetidas en cada prompt.</h2>
+          <div class="split">
+            <div>
+              <p class="lead">Business skills permite documentar procesos, criterios, pasos y políticas para que distintos agentes puedan descubrir y aplicar una misma lógica empresarial.</p>
+              <div class="note"><strong>Aplicación típica:</strong> útil para procesos donde la decisión no depende solo del dato, sino de cómo la organización interpreta el dato.</div>
+            </div>
+            <div class="grid">
+              <div class="card compact"><h3>Ejemplo</h3><p class="small">“Para clasificar una solicitud crítica, evalúa impacto, urgencia, cliente afectado, SLA y dependencias operativas.”</p></div>
+              <div class="card compact"><h3>Uso</h3><p class="small">Un agente consulta la skill cuando necesita aplicar una política, no solo responder con datos.</p></div>
+              <div class="card compact"><h3>Gobierno</h3><p class="small">Se gestionan como activos reutilizables y transportables entre entornos mediante soluciones.</p></div>
+            </div>
+          </div>
+          <div class="sources"><a class="src" href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/data-platform-business-skills" target="_blank">Create and use business skills</a></div>
+        </div>
+        <div class="slide-no">7</div>
+      </section>
+
+      <section class="slide" id="s10">
+        <div class="inner">
+          <div class="kicker">Arquitectura propuesta</div>
+          <h2>Una evolución por capas, no una reconstrucción de la aplicación.</h2>
+          <div class="stack">
+            <div class="layer"><div class="label">Canal</div><div class="body">Microsoft 365 Copilot, Teams, Outlook y la propia Model-driven app.</div></div>
+            <div class="layer"><div class="label">Agente</div><div class="body">Agente declarativo generado por App MCP + agente de Copilot Studio para lógica específica.</div></div>
+            <div class="layer"><div class="label">Herramientas</div><div class="body">App MCP para vistas/formularios, Dataverse MCP para datos/operaciones y herramientas custom para sistemas externos.</div></div>
+            <div class="layer"><div class="label">Supervisión</div><div class="body">Power Apps MCP + agent feed para revisión humana, excepciones y entrada de datos asistida.</div></div>
+            <div class="layer"><div class="label">Semántica</div><div class="body">Dataverse Intelligence, semantic model y business skills para que el agente entienda el lenguaje del negocio.</div></div>
+            <div class="layer"><div class="label">Core</div><div class="body">Model-driven app existente, Dataverse, seguridad por roles, vistas, formularios, relaciones y auditoría.</div></div>
+          </div>
+        </div>
+        <div class="slide-no">ARCH</div>
+      </section>
+
+      <section class="slide" id="s11">
+        <div class="inner">
+          <div class="kicker">Plan recomendado</div>
+          <h2>De valor visible a operación agéntica controlada.</h2>
+          <div class="grid cols-3">
+            <div class="card tall"><div class="num">0–30 días</div><h3>Preparar la base</h3><ul class="clean"><li>Activar y revisar Dataverse Search.</li><li>Identificar tablas críticas.</li><li>Limpiar nombres, vistas y formularios.</li><li>Definir glosario mínimo.</li></ul></div>
+            <div class="card tall"><div class="num">31–60 días</div><h3>Piloto Copilot</h3><ul class="clean"><li>Dataverse como knowledge.</li><li>Agent Response en un formulario.</li><li>Primer App MCP sobre app acotada.</li><li>Validación con usuarios clave.</li></ul></div>
+            <div class="card tall"><div class="num">61–90 días</div><h3>Operación asistida</h3><ul class="clean"><li>Power Apps MCP + agent feed.</li><li>Business skills.</li><li>Herramientas MCP custom.</li><li>Métricas de uso, precisión y ahorro.</li></ul></div>
+          </div>
+          <div class="note"><strong>Criterio de éxito:</strong> no medir solo “respuestas correctas”; medir reducción de navegación, tiempo de cumplimentación, calidad de datos y trazabilidad de decisiones.</div>
+        </div>
+        <div class="slide-no">90D</div>
+      </section>
+
+      <section class="slide" id="s12">
+        <div class="inner">
+          <div class="kicker">Consideraciones y límites</div>
+          <h2>Antes de venderlo como productivo, conviene acotar expectativas.</h2>
+          <div class="grid cols-2">
+            <div class="card tall"><div class="num">Disponibilidad</div><ul class="clean"><li>Varias capacidades están en preview o prerelease.</li><li>La disponibilidad puede depender de región, entorno y licencias.</li><li>Microsoft 365 Copilot para apps requiere configuración por entorno y app.</li></ul></div>
+            <div class="card tall"><div class="num">Seguridad</div><ul class="clean"><li>Copilot hereda permisos, pero el modelo de roles debe revisarse.</li><li>Column security y datos sensibles pueden limitar experiencias.</li><li>Las operaciones destructivas requieren especial gobierno y aprobaciones.</li></ul></div>
+            <div class="card tall"><div class="num">Calidad</div><ul class="clean"><li>La IA entiende peor tablas con nombres técnicos, relaciones pobres o vistas confusas.</li><li>Dataverse Search y el semantic model deben tratarse como parte del diseño funcional.</li><li>Los primeros casos deben tener scope estrecho y datos de alta calidad.</li></ul></div>
+            <div class="card tall"><div class="num">Operación</div><ul class="clean"><li>invoke_data_entry presenta sugerencias para revisión; no debe asumirse creación automática sin control.</li><li>App MCP no elimina la necesidad de procesos deterministas para transacciones críticas.</li><li>Conviene instrumentar trazabilidad, feedback y criterios de aceptación.</li></ul></div>
+          </div>
+          <div class="sources">
+            <a class="src" href="https://learn.microsoft.com/en-us/power-apps/user/form-filling-assistance" target="_blank">AI form fill limitations</a>
+            <a class="src" href="https://learn.microsoft.com/en-us/power-platform/admin/configure-relevance-search-organization" target="_blank">Configure Dataverse Search</a>
+            <a class="src" href="https://learn.microsoft.com/en-us/power-apps/maker/common/faq-power-apps-mcp-server-invoke-data-entry" target="_blank">invoke_data_entry FAQ</a>
+          </div>
+        </div>
+        <div class="slide-no">!</div>
+      </section>
+
+      <section class="slide" id="s13">
+        <div class="inner">
+          <div class="kicker">Fuentes oficiales</div>
+          <h2>Documentación Microsoft Learn utilizada como referencia.</h2>
+          <div class="source-list">
+            <div class="source-row"><b>Knowledge</b><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-add-dataverse" target="_blank">Add Dataverse tables as a knowledge source</a></div>
+            <div class="source-row"><b>App MCP</b><a href="https://learn.microsoft.com/en-us/power-apps/maker/model-driven-apps/enable-your-app-copilot" target="_blank">Enable your app and custom tools in Microsoft 365 Copilot</a></div>
+            <div class="source-row"><b>Dataverse MCP</b><a href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/data-platform-mcp" target="_blank">Connect to Dataverse with Model Context Protocol</a></div>
+            <div class="source-row"><b>Power Apps MCP</b><a href="https://learn.microsoft.com/en-us/power-apps/maker/model-driven-apps/power-apps-mcp-server" target="_blank">Work with Power Apps MCP server</a></div>
+            <div class="source-row"><b>Agent Feed</b><a href="https://learn.microsoft.com/en-us/power-apps/user/supervise-agents-with-agent-feed" target="_blank">Supervise agents in model-driven apps with agent feed</a></div>
+            <div class="source-row"><b>Agent Response</b><a href="https://learn.microsoft.com/en-us/power-apps/maker/model-driven-apps/form-designer-add-configure-agent-response" target="_blank">Add agent response using the form designer</a></div>
+            <div class="source-row"><b>Semantic Model</b><a href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/semantic-model-overview" target="_blank">Overview of Dataverse semantic model</a></div>
+            <div class="source-row"><b>Business Skills</b><a href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/data-platform-business-skills" target="_blank">Create and use business skills</a></div>
+          </div>
+        </div>
+        <div class="slide-no">REF</div>
+      </section>
+    </main>
+  </div>
+  <script>
+    const sections = [...document.querySelectorAll('section.slide')];
+    const links = [...document.querySelectorAll('#navlinks a')];
+    const bar = document.getElementById('bar');
+    const particleField = document.getElementById('particleField');
+
+    function buildParticles(){
+      if(!particleField) return;
+      const total = window.innerWidth < 980 ? 16 : 28;
+      particleField.innerHTML = '';
+      for(let i = 0; i < total; i++){
+        const p = document.createElement('span');
+        const variants = ['particle','particle soft','particle dot'];
+        p.className = variants[i % variants.length];
+        p.style.left = `${Math.random() * 100}%`;
+        p.style.top = `${Math.random() * 100}%`;
+        p.style.setProperty('--dx', `${(Math.random() * 70 - 35).toFixed(0)}px`);
+        p.style.setProperty('--dy', `${(-40 - Math.random() * 90).toFixed(0)}px`);
+        p.style.setProperty('--dur', `${14 + Math.random() * 16}s`);
+        p.style.setProperty('--delay', `${-Math.random() * 18}s`);
+        particleField.appendChild(p);
+      }
+    }
+
+    function update(){
+      const y = window.scrollY;
+      const h = document.documentElement.scrollHeight - innerHeight;
+      bar.style.width = Math.max(0, Math.min(100, (y/h)*100)) + '%';
+      let current = sections[0].id;
+      for(const s of sections){ if(s.offsetTop - 160 <= y) current = s.id; }
+      links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
+    }
+    addEventListener('scroll', update, {passive:true});
+    addEventListener('resize', buildParticles, {passive:true});
+    buildParticles();
+    update();
+    addEventListener('keydown', (e)=>{
+      if(!['ArrowRight','ArrowLeft','PageDown','PageUp'].includes(e.key)) return;
+      const y = window.scrollY;
+      let idx = sections.findIndex(s => Math.abs(s.offsetTop - y) < innerHeight/2);
+      if(idx < 0){ idx = sections.findIndex(s => s.offsetTop > y) - 1; if(idx < 0) idx = 0; }
+      if(e.key === 'ArrowRight' || e.key === 'PageDown') idx = Math.min(sections.length-1, idx+1);
+      if(e.key === 'ArrowLeft' || e.key === 'PageUp') idx = Math.max(0, idx-1);
+      sections[idx].scrollIntoView({behavior:'smooth', block:'start'}); e.preventDefault();
+    });
+  </script>
+</body>
+</html>

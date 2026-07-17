@@ -270,23 +270,25 @@ describe("eventSchemas", () => {
         payload: {
           cabinId: "exterior-pet-friendly",
           cabinName: "Camarote exterior pet friendly",
-          passengers: 2,
-          hasPets: true,
-          priceDelta: 95,
+          deck: 8,
+          price: 95,
+          currency: "EUR",
+          petFriendly: true,
         },
       };
       expect(() => uiToAgentEventSchema.parse(event)).not.toThrow();
     });
 
-    it("rejects cabinSelected with negative priceDelta", () => {
+    it("rejects cabinSelected with negative price", () => {
       const event = {
         type: "ui.cabinSelected",
         payload: {
           cabinId: "exterior-pet-friendly",
           cabinName: "Camarote exterior pet friendly",
-          passengers: 2,
-          hasPets: true,
-          priceDelta: -10,
+          deck: 8,
+          price: -10,
+          currency: "EUR",
+          petFriendly: true,
         },
       };
       expect(() => uiToAgentEventSchema.parse(event)).toThrow();

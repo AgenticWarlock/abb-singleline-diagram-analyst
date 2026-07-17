@@ -13,7 +13,7 @@ interface CabinGalleryModalProps {
 }
 
 /**
- * GalerÃ­a ampliada en modal.
+ * Galeria ampliada en modal.
  * El padre pasa key={startIndex} para re-montar cuando cambia startIndex,
  * evitando setState dentro de useEffect.
  */
@@ -50,11 +50,11 @@ export function CabinGalleryModal({
       className={styles.overlay}
       role="dialog"
       aria-modal="true"
-      aria-label="GalerÃ­a ampliada del camarote"
+      aria-label="Galeria ampliada del camarote"
       onClick={onClose}
     >
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Cerrar galerÃ­a">âœ•</button>
+        <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Cerrar galeria">X</button>
         <span className={styles.counter} aria-live="polite">{idx + 1} / {images.length}</span>
         <div className={styles.imgWrapper}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -63,8 +63,8 @@ export function CabinGalleryModal({
         <p className={styles.caption}>{images[idx].alt}</p>
         {images.length > 1 && (
           <>
-            <button type="button" className={`${styles.navBtn} ${styles.navPrev}`} onClick={() => go(idx - 1)} aria-label="Imagen anterior">â€¹</button>
-            <button type="button" className={`${styles.navBtn} ${styles.navNext}`} onClick={() => go(idx + 1)} aria-label="Imagen siguiente">â€º</button>
+            <button type="button" className={`${styles.navBtn} ${styles.navPrev}`} onClick={() => go(idx - 1)} aria-label="Imagen anterior">&lt;</button>
+            <button type="button" className={`${styles.navBtn} ${styles.navNext}`} onClick={() => go(idx + 1)} aria-label="Imagen siguiente">&gt;</button>
           </>
         )}
         {images.length > 1 && (

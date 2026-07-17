@@ -17,18 +17,18 @@
 }
 
 .headerIcon {
-  color: #00b4d8;
+  color: #4b87c2;
 }
 
 .headerText {
-  color: #1a4a9e;
+  color: #1f3048;
   font-weight: 600;
 }
 
 .notFound {
   padding: 16px;
-  background: #fff5e6;
+  background: #fff8ef;
   border-radius: 8px;
-  border: 1px solid #f5a000;
-  color: #7a4a00;
+  border: 1px solid #e9c58f;
+  color: #78532a;
 }

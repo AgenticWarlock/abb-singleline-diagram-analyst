@@ -2,9 +2,30 @@
   display: grid;
   gap: 12px;
   border-radius: 14px !important;
-  box-shadow: 0 4px 20px rgba(13, 38, 86, 0.12) !important;
-  border: 1px solid rgba(13, 38, 86, 0.1) !important;
+  box-shadow: 0 6px 16px rgba(22, 38, 60, 0.09) !important;
+  border: 1px solid rgba(22, 35, 58, 0.1) !important;
   padding: 16px !important;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  position: relative;
+  overflow: hidden;
+  animation: pickerIn 0.3s ease-out;
+}
+
+.card::after {
+  content: "";
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  top: -54px;
+  right: -58px;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, rgba(118, 179, 217, 0.25), rgba(118, 179, 217, 0.02) 70%);
+  pointer-events: none;
+}
+
+@keyframes pickerIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .header {
@@ -14,7 +35,7 @@
 }
 
 .shipIcon {
-  color: #00b4d8;
+  color: #4b87c2;
   flex-shrink: 0;
   margin-top: 2px;
   font-size: 20px;
@@ -23,24 +44,48 @@
 .route {
   display: block;
   font-size: 15px !important;
-  color: #0d2656;
+  color: #1c2b42;
 }
 
 .hint {
   display: block;
-  color: #5a7aaa;
+  color: #70839c;
   margin-top: 2px;
 }
 
 .picker {
-  border: 1px solid rgba(13, 38, 86, 0.12);
+  border: 1px solid #d7e1ec;
   border-radius: 10px;
   padding: 10px;
   overflow-x: auto;
-  background: #fafcff;
+  background: #f9fbfe;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.picker:hover {
+  border-color: #c5d7ea;
+  box-shadow: 0 6px 14px rgba(40, 73, 111, 0.08);
 }
 
 /* Fluent-style primary button override */
 .confirmBtn {
   justify-self: stretch;
+  border-radius: 10px !important;
+  border: 1px solid #2f6fb0 !important;
+  background: linear-gradient(180deg, #3d7fbe, #2f6fb0) !important;
+}
+
+.confirmBtn:hover {
+  background: linear-gradient(180deg, #4b8bc9, #3a79b7) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(47, 111, 176, 0.24);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .picker,
+  .confirmBtn {
+    animation: none !important;
+    transition: none !important;
+  }
 }

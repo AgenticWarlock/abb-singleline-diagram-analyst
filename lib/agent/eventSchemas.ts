@@ -113,9 +113,10 @@ export const uiToAgentEventSchema = z.discriminatedUnion("type", [
     payload: z.object({
       cabinId: z.string().min(1),
       cabinName: z.string().min(1),
-      passengers: z.number().int().min(1),
-      hasPets: z.boolean(),
-      priceDelta: z.number().min(0),
+      deck: z.number().int().min(1),
+      price: z.number().min(0),
+      currency: z.string().min(1),
+      petFriendly: z.boolean(),
     }),
   }),
 ]);

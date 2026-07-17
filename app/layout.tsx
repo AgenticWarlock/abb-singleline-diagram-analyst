@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TRASMED Travel POC",
+  title: "ASistente de reservas",
   description: "POC de agencia de viajes con agente de IA y UI rica",
 };
 
