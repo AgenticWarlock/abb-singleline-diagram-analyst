@@ -69,14 +69,7 @@ export interface TravelPartySelectedPayload {
   hasPets: boolean;
 }
 
-export interface CabinSelectedPayload {
-  cabinId: string;
-  cabinName: string;
-  deck: number;
-  price: number;
-  currency: string;
-  petFriendly: boolean;
-}
+export type CabinSelectedPayload = string;
 
 export type AgentToUiEvent =
   | { type: "ui.showDatePicker"; payload: ShowDatePickerPayload }

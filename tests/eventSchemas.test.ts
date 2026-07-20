@@ -267,26 +267,27 @@ describe("eventSchemas", () => {
     it("accepts a valid cabinSelected event", () => {
       const event = {
         type: "ui.cabinSelected",
-        payload: {
-          cabinId: "exterior-pet-friendly",
-          cabinName: "Camarote exterior pet friendly",
-          deck: 8,
-          price: 95,
-          currency: "EUR",
-          petFriendly: true,
-        },
+        payload: "Camarote: Camarote exterior pet friendly.",
       };
       expect(() => uiToAgentEventSchema.parse(event)).not.toThrow();
     });
 
-    it("rejects cabinSelected with negative price", () => {
+    it("rejects cabinSelected with an empty summary", () => {
+      const event = {
+        type: "ui.cabinSelected",
+        payload: "",
+      };
+      expect(() => uiToAgentEventSchema.parse(event)).toThrow();
+    });
+
+    it("rejects cabinSelected object payloads", () => {
       const event = {
         type: "ui.cabinSelected",
         payload: {
           cabinId: "exterior-pet-friendly",
           cabinName: "Camarote exterior pet friendly",
           deck: 8,
-          price: -10,
+          price: 95,
           currency: "EUR",
           petFriendly: true,
         },

@@ -247,20 +247,16 @@ export class DirectLineTransport implements AgentTransport {
     const activity = {
       type: "event",
       name: activityName,
-      from: { id: this.userId, name: "Usuario" },
+      from: { id: this.userId, name: "Usuario", role: "user" },
       value: activityValue,
       locale: "es-ES",
     } as Activity;
 
     if (activityName === "ui.cabinSelected") {
-      const value = (activity.value ?? undefined) as Record<string, unknown> | undefined;
-      console.debug("[ui.cabinSelected] outgoing activity", activity);
-      console.debug("[ui.cabinSelected] fields", {
+      console.debug("[ui.cabinSelected]", {
         type: activity.type,
         name: activity.name,
-        text: activity.text,
-        value: activity.value,
-        summaryInput: value?.summaryInput,
+        value: event.payload,
       });
     }
 

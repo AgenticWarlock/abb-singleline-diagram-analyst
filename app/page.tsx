@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { DateRange } from "react-day-picker";
-import { BrandVariants, createLightTheme, FluentProvider, Text } from "@fluentui/react-components";
+import { Badge, BrandVariants, createLightTheme, FluentProvider, Text } from "@fluentui/react-components";
 import { ChatPanel } from "@/components/chat";
 import { TravelDateRangePicker } from "@/components/travel";
 import { TravelPartySelector } from "@/components/travel/party";
@@ -26,6 +26,15 @@ const trasmedBrand: BrandVariants = {
 };
 const trasmedTheme = createLightTheme(trasmedBrand);
 
+const statusLabels: Record<AgentConnectionStatus, string> = {
+  online: "Conectado",
+  connecting: "Conectando…",
+  reconnecting: "Reconectando…",
+  disconnected: "Desconectado",
+  expired: "Sesión expirada",
+  failed: "Error",
+};
+
 const createMessage = (
   role: ChatMessageModel["role"],
   text: string,
@@ -35,6 +44,13 @@ const createMessage = (
   text,
   timestamp: new Date().toISOString(),
 });
+
+const formatLocalIsoDate = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
 
 export default function Home() {
   const transportRef = useRef<AgentTransport | null>(null);
@@ -141,6 +157,10 @@ export default function Home() {
   }, []);
 
   const onSendMessage = async (text: string) => {
+    if (connectionStatus !== "online") {
+      return;
+    }
+
     appendMessage(createMessage("user", text));
     setPanelError(null);
     setIsBusy(true);
@@ -165,8 +185,8 @@ export default function Home() {
     }
 
     return {
-      fromDate: dateRange.from.toISOString().slice(0, 10),
-      toDate: dateRange.to.toISOString().slice(0, 10),
+      fromDate: formatLocalIsoDate(dateRange.from),
+      toDate: formatLocalIsoDate(dateRange.to),
     };
   }, [dateRange]);
 
@@ -248,24 +268,23 @@ export default function Home() {
       ),
     );
 
-    const eventPayload = {
-      cabinId: cabin.id,
-      cabinName: cabin.name,
-      deck: cabin.deck,
-      price: cabin.priceDelta,
-      currency: "EUR",
-      petFriendly: cabin.petFriendly,
-    };
-
-    console.info("[POC] Direct Line event", {
-      name: "ui.cabinSelected",
-      value: eventPayload,
-    });
+    const summaryInput = [
+      origin && `Origen: ${origin}`,
+      destination && `Destino: ${destination}`,
+      formattedRange && `Fechas: ${fmtDate(formattedRange.fromDate)} - ${fmtDate(formattedRange.toDate)}`,
+      `Pasajeros: ${passengers}`,
+      `Mascota: ${hasPets ? "Si" : "No"}`,
+      `Camarote: ${cabin.name}`,
+      cabin.deck && `Cubierta: ${cabin.deck}`,
+      `Suplemento: +${cabin.priceDelta} EUR`,
+    ]
+      .filter(Boolean)
+      .join(". ");
 
     try {
       await transportRef.current?.sendEvent({
         type: "ui.cabinSelected",
-        payload: eventPayload,
+        payload: summaryInput,
       });
 
       setSentCabinSelectionId(selectedCabinId);
@@ -311,6 +330,16 @@ export default function Home() {
               <Text className={styles.headerTitle}>Asistente de Reservas + Copilot Studio Direct Line (directline)</Text>
             </div>
           </div>
+          <Badge
+            appearance="filled"
+            color="informative"
+            size="small"
+            className={`${styles.statusBadge} ${
+              connectionStatus === "online" ? styles.statusBadgeOnline : ""
+            }`}
+          >
+            {statusLabels[connectionStatus]}
+          </Badge>
         </header>
         <main className={styles.main}>
           <section className={styles.chatPanel}>
@@ -318,7 +347,7 @@ export default function Home() {
               messages={messages}
               isBusy={isBusy}
               onSendMessage={onSendMessage}
-              connectionStatus={connectionStatus}
+              inputDisabled={connectionStatus !== "online"}
               inlineContent={
                 showDatePicker ? (
                   <>

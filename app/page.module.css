@@ -98,6 +98,28 @@
   z-index: 3;
 }
 
+.statusBadge {
+  margin-left: auto;
+  position: relative;
+  z-index: 3;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  background: rgba(255, 255, 255, 0.18) !important;
+  color: #eef5ff !important;
+  backdrop-filter: blur(2px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  font-size: 10px !important;
+  line-height: 14px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  white-space: nowrap;
+}
+
+.statusBadgeOnline {
+  background: #1f7a4d !important;
+  border-color: rgba(220, 255, 235, 0.7) !important;
+  color: #ffffff !important;
+}
+
 .headerLogo {
   width: 38px;
   height: 38px;

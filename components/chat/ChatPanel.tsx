@@ -2,9 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import React from "react";
-import { Badge, Body1Strong, Card } from "@fluentui/react-components";
-import { Bot24Regular } from "@fluentui/react-icons";
-import type { AgentConnectionStatus } from "@/lib/agent/AgentTransport";
+import { Body1Strong, Card } from "@fluentui/react-components";
 import type { ChatMessageModel } from "@/lib/agent/eventTypes";
 import { ChatMessage } from "./ChatMessage";
 import { ChatComposer } from "./ChatComposer";
@@ -13,22 +11,13 @@ import styles from "./ChatPanel.module.css";
 interface ChatPanelProps {
   messages: ChatMessageModel[];
   isBusy: boolean;
-  connectionStatus: AgentConnectionStatus;
+  inputDisabled: boolean;
   onSendMessage: (text: string) => Promise<void>;
   /** Contenido rico opcional que se renderiza inline al final de los mensajes */
   inlineContent?: React.ReactNode;
 }
 
-const statusLabels: Record<AgentConnectionStatus, string> = {
-  online: "Conectado",
-  connecting: "Conectando…",
-  reconnecting: "Reconectando…",
-  disconnected: "Desconectado",
-  expired: "Sesión expirada",
-  failed: "Error",
-};
-
-export function ChatPanel({ messages, isBusy, connectionStatus, onSendMessage, inlineContent }: ChatPanelProps) {
+export function ChatPanel({ messages, isBusy, inputDisabled, onSendMessage, inlineContent }: ChatPanelProps) {
   const messagesContainerRef = useRef<HTMLElement>(null);
   const inlineContentRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -75,26 +64,6 @@ export function ChatPanel({ messages, isBusy, connectionStatus, onSendMessage, i
 
   return (
     <Card className={styles.wrapper} style={{ padding: 0, gap: 0 }}>
-      <header className={styles.header}>
-        {isBusy && <div className={styles.progressBar} aria-hidden="true" />}
-        <div className={styles.headerLeft}>
-          <div className={styles.avatarBot}>
-            <Bot24Regular className={styles.botIcon} />
-          </div>
-          <div>
-            <Body1Strong className={styles.headerTitle}>Nauta de reservas</Body1Strong>
-            <span className={styles.headerSub}>Reserva tu ferry</span>
-          </div>
-        </div>
-        <Badge
-          appearance="filled"
-          color="informative"
-          size="small"
-          className={styles.statusBadge}
-        >
-          {statusLabels[connectionStatus]}
-        </Badge>
-      </header>
       <section
         ref={messagesContainerRef}
         className={`${styles.messages} ${hasInlineContent ? styles.messagesWithInline : ""}`}
@@ -131,7 +100,7 @@ export function ChatPanel({ messages, isBusy, connectionStatus, onSendMessage, i
         )}
         <div ref={messagesEndRef} />
       </section>
-      <ChatComposer onSend={onSendMessage} disabled={isBusy} />
+      <ChatComposer onSend={onSendMessage} disabled={isBusy || inputDisabled} />
     </Card>
   );
 }

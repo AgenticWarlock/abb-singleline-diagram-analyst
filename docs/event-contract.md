@@ -68,3 +68,14 @@ Definir un contrato cerrado entre UI y agente para un transporte simulado.
   }
 }
 ```
+
+### ui.cabinSelected
+```json
+{
+  "type": "ui.cabinSelected",
+  "payload": "Origen: Valencia. Destino: Ibiza. Fechas: 20 jul 2026 - 23 jul 2026. Pasajeros: 2. Mascota: Si. Camarote: Camarote exterior pet friendly. Cubierta: 8. Suplemento: +95 EUR"
+}
+```
+
+Al enviarse mediante Direct Line, el agente recibe el texto directamente en `System.Activity.Value`.
+El resumen puede leerse con `Text(System.Activity.Value)`.
