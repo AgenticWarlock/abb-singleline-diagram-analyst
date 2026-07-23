@@ -63,6 +63,25 @@
   background: transparent;
 }
 
+.adaptiveCard {
+  margin-top: 10px;
+  max-width: 100%;
+}
+
+.adaptiveCard:first-child {
+  margin-top: 0;
+}
+
+.adaptiveCard :global(.ac-container) {
+  font-family: inherit;
+}
+
+.adaptiveCard :global(.ac-adaptiveCard) {
+  max-width: 100%;
+  border: 0;
+  background: transparent;
+}
+
 .user {
   margin-left: auto;
   background: var(--abb-red);

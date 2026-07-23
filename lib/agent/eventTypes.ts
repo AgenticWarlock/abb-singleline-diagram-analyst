@@ -41,6 +41,7 @@ export interface ShowFlightsPayload {
 export interface ShowMessagePayload {
   text: string;
   authorName?: string;
+  adaptiveCards?: unknown[];
 }
 
 export interface ShowTravelPartySelectorPayload {
@@ -91,4 +92,5 @@ export interface ChatMessageModel {
   text: string;
   timestamp: string;
   authorName?: string;
+  adaptiveCards?: unknown[];
 }

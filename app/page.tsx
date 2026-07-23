@@ -114,7 +114,10 @@ export default function Home() {
           setAgentDisplayName(nextAgentName);
         }
 
-        appendMessage(createMessage("agent", event.payload.text, nextAgentName));
+        appendMessage({
+          ...createMessage("agent", event.payload.text, nextAgentName),
+          adaptiveCards: event.payload.adaptiveCards,
+        });
       }
     });
 

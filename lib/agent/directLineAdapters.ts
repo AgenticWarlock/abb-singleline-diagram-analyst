@@ -8,6 +8,16 @@ import {
 } from "@/lib/agent/eventSchemas";
 
 const MAX_AGENT_MESSAGE_LENGTH = 4000;
+const ADAPTIVE_CARD_CONTENT_TYPE = "application/vnd.microsoft.card.adaptive";
+
+interface ActivityAttachment {
+  contentType?: string;
+  content?: unknown;
+}
+
+interface ActivityWithAttachments {
+  attachments?: ActivityAttachment[];
+}
 
 const truncateText = (value: string): string => {
   if (value.length <= MAX_AGENT_MESSAGE_LENGTH) {
@@ -29,6 +39,24 @@ export const isOwnUserMessage = (activity: Activity, userId: string): boolean =>
   return activity.from?.role === "user";
 };
 
+const parseAdaptiveCard = (content: unknown): unknown | null => {
+  if (typeof content !== "string") {
+    return content ?? null;
+  }
+
+  try {
+    return JSON.parse(content);
+  } catch {
+    return null;
+  }
+};
+
+const getAdaptiveCards = (activity: Activity): unknown[] =>
+  ((activity as unknown as ActivityWithAttachments).attachments ?? [])
+    .filter((attachment) => attachment.contentType === ADAPTIVE_CARD_CONTENT_TYPE)
+    .map((attachment) => parseAdaptiveCard(attachment.content))
+    .filter((card): card is unknown => card !== null);
+
 export const mapDirectLineActivityToAgentEvent = (
   activity: Activity,
 ): AgentToUiEvent | null => {
@@ -42,8 +70,9 @@ export const mapDirectLineActivityToAgentEvent = (
     return null;
   }
 
-  const text = activity.text?.trim();
-  if (!text) {
+  const text = activity.text?.trim() ?? "";
+  const adaptiveCards = getAdaptiveCards(activity);
+  if (!text && adaptiveCards.length === 0) {
     return null;
   }
 
@@ -52,6 +81,7 @@ export const mapDirectLineActivityToAgentEvent = (
     payload: {
       text: truncateText(text),
       authorName: activity.from?.name?.trim() || undefined,
+      adaptiveCards: adaptiveCards.length > 0 ? adaptiveCards : undefined,
     },
   };
 };

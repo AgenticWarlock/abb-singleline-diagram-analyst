@@ -17,6 +17,8 @@ import type { UiToAgentEvent } from "./eventTypes";
 
 const DEFAULT_DIRECT_LINE_DOMAIN = "https://europe.directline.botframework.com/v3/directline";
 const DEFAULT_START_EVENT_NAME = "startConversation";
+const DEFAULT_START_FALLBACK_MESSAGE = "";
+const DEFAULT_START_FALLBACK_DELAY_MS = 2500;
 
 const shouldAutoStartConversation = (): boolean => {
   const rawValue = process.env.NEXT_PUBLIC_AGENT_AUTO_START_CONVERSATION?.trim().toLowerCase();
@@ -27,8 +29,34 @@ const shouldAutoStartConversation = (): boolean => {
   return rawValue !== "false" && rawValue !== "0" && rawValue !== "off";
 };
 
+const shouldUseDirectLineWebSocket = (): boolean => {
+  const rawValue = process.env.NEXT_PUBLIC_DIRECT_LINE_USE_WEBSOCKET?.trim().toLowerCase();
+  if (!rawValue) {
+    return true;
+  }
+
+  return rawValue !== "false" && rawValue !== "0" && rawValue !== "off";
+};
+
 const getConversationStartEventName = (): string =>
   process.env.NEXT_PUBLIC_AGENT_START_EVENT_NAME?.trim() || DEFAULT_START_EVENT_NAME;
+
+const getConversationStartFallbackMessage = (): string =>
+  process.env.NEXT_PUBLIC_AGENT_START_FALLBACK_MESSAGE?.trim() || DEFAULT_START_FALLBACK_MESSAGE;
+
+const getConversationStartFallbackDelayMs = (): number => {
+  const rawValue = process.env.NEXT_PUBLIC_AGENT_START_FALLBACK_DELAY_MS?.trim();
+  if (!rawValue) {
+    return DEFAULT_START_FALLBACK_DELAY_MS;
+  }
+
+  const parsed = Number(rawValue);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    return DEFAULT_START_FALLBACK_DELAY_MS;
+  }
+
+  return Math.floor(parsed);
+};
 
 export class DirectLineTransport implements AgentTransport {
   private directLine: DirectLine | null = null;
@@ -43,6 +71,9 @@ export class DirectLineTransport implements AgentTransport {
   private reconnecting = false;
   private localClientActivityIds = new Set<string>();
   private hasSentAutoStartEvent = false;
+  private hasSentAutoStartMessage = false;
+  private awaitingAutoStartResponse = false;
+  private autoStartFallbackTimer: ReturnType<typeof setTimeout> | null = null;
 
   async connect(): Promise<void> {
     await this.initializeDirectLine();
@@ -69,8 +100,13 @@ export class DirectLineTransport implements AgentTransport {
     const tokenPayload = copilotTokenResponseSchema.parse(json);
     this.lastConversationId = tokenPayload.conversationId;
     this.hasSentAutoStartEvent = false;
+    this.hasSentAutoStartMessage = false;
+    this.awaitingAutoStartResponse = false;
+    this.clearAutoStartFallbackTimer();
     const directLineDomain =
-      process.env.NEXT_PUBLIC_DIRECT_LINE_DOMAIN?.trim() || DEFAULT_DIRECT_LINE_DOMAIN;
+      tokenPayload.directLineDomain?.trim() ||
+      process.env.NEXT_PUBLIC_DIRECT_LINE_DOMAIN?.trim() ||
+      DEFAULT_DIRECT_LINE_DOMAIN;
 
     this.activitySubscription?.unsubscribe();
     this.statusSubscription?.unsubscribe();
@@ -85,7 +121,7 @@ export class DirectLineTransport implements AgentTransport {
     this.directLine = new DirectLine({
       token: tokenPayload.token,
       domain: directLineDomain,
-      webSocket: true,
+      webSocket: shouldUseDirectLineWebSocket(),
       conversationStartProperties: {
         locale: "es-ES",
       },
@@ -117,18 +153,17 @@ export class DirectLineTransport implements AgentTransport {
       }, 12000);
 
       const waitSubscription = this.directLine?.connectionStatus$.subscribe({
-        next: (status) => {
+        next: async (status) => {
           if (status === ConnectionStatus.Online) {
             clearTimeout(timeoutId);
             this.connectedReady = true;
             waitSubscription?.unsubscribe();
-            this.sendAutoStartConversationEvent().then(
-              () => undefined,
-              (error: unknown) => {
-                this.logDirectLineError("autoStartConversation", error);
-              },
-            );
-            resolve();
+            try {
+              await this.sendAutoStartConversationEvent();
+              resolve();
+            } catch (error) {
+              reject(error instanceof Error ? error : new Error(String(error)));
+            }
           }
 
           if (
@@ -305,6 +340,9 @@ export class DirectLineTransport implements AgentTransport {
     this.lastConversationId = null;
     this.connectedReady = false;
     this.hasSentAutoStartEvent = false;
+    this.hasSentAutoStartMessage = false;
+    this.awaitingAutoStartResponse = false;
+    this.clearAutoStartFallbackTimer();
     this.localClientActivityIds.clear();
     this.listeners.clear();
     this.statusListeners.clear();
@@ -345,6 +383,92 @@ export class DirectLineTransport implements AgentTransport {
         },
         error: (error: unknown) => {
           this.hasSentAutoStartEvent = false;
+          subscription?.unsubscribe();
+          reject(error);
+        },
+      });
+    });
+
+    this.awaitingAutoStartResponse = true;
+    this.scheduleAutoStartConversationFallback();
+  }
+
+  private scheduleAutoStartConversationFallback(): void {
+    const fallbackMessage = getConversationStartFallbackMessage();
+    if (!fallbackMessage) {
+      return;
+    }
+
+    const delayMs = getConversationStartFallbackDelayMs();
+    this.clearAutoStartFallbackTimer();
+
+    this.autoStartFallbackTimer = setTimeout(() => {
+      if (!this.awaitingAutoStartResponse) {
+        return;
+      }
+
+      void this.sendAutoStartConversationMessage().catch((error: unknown) => {
+        this.logDirectLineError("sendAutoStartConversationMessage", error);
+      });
+    }, delayMs);
+  }
+
+  private clearAutoStartFallbackTimer(): void {
+    if (!this.autoStartFallbackTimer) {
+      return;
+    }
+
+    clearTimeout(this.autoStartFallbackTimer);
+    this.autoStartFallbackTimer = null;
+  }
+
+  private markAutoStartResponseReceived(): void {
+    this.awaitingAutoStartResponse = false;
+    this.clearAutoStartFallbackTimer();
+  }
+
+  private async sendAutoStartConversationMessage(): Promise<void> {
+    const fallbackMessage = getConversationStartFallbackMessage();
+    if (!fallbackMessage) {
+      return;
+    }
+
+    if (!this.directLine || !this.connectedReady || this.connectionStatus !== "online") {
+      return;
+    }
+
+    if (this.hasSentAutoStartMessage) {
+      return;
+    }
+
+    this.markAutoStartResponseReceived();
+    this.hasSentAutoStartMessage = true;
+
+    const activity: Activity = {
+      type: "message",
+      from: { id: this.userId, name: "Usuario" },
+      text: fallbackMessage,
+      locale: "es-ES",
+      channelData: {
+        clientActivityId: crypto.randomUUID(),
+        postBack: true,
+        bootstrap: true,
+      },
+    };
+
+    const clientActivityId = this.extractClientActivityId(activity);
+    if (clientActivityId) {
+      this.localClientActivityIds.add(clientActivityId);
+    }
+
+    await new Promise<void>((resolve, reject) => {
+      const subscription = this.directLine?.postActivity(activity).subscribe({
+        next: () => {
+          subscription?.unsubscribe();
+          resolve();
+        },
+        error: (error: unknown) => {
+          this.hasSentAutoStartMessage = false;
           subscription?.unsubscribe();
           reject(error);
         },
@@ -406,6 +530,8 @@ export class DirectLineTransport implements AgentTransport {
     if (this.isLocalEcho(activity)) {
       return;
     }
+
+    this.markAutoStartResponseReceived();
 
     // Actividades de tipo "event" (ui.showDatePicker, etc.) — no mostrar como mensaje
     if (activity.type === "event") {

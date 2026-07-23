@@ -4,6 +4,77 @@ import { copilotTokenResponseSchema } from "@/lib/agent/tokenSchemas";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+const computeRegionalChannelSettingsUrl = (tokenEndpoint: string): string | null => {
+  try {
+    const endpointUrl = new URL(tokenEndpoint);
+    const marker = "/powervirtualagents";
+    const markerIndex = endpointUrl.pathname.indexOf(marker);
+    if (markerIndex < 0) {
+      return null;
+    }
+
+    const apiVersion = endpointUrl.searchParams.get("api-version");
+    if (!apiVersion) {
+      return null;
+    }
+
+    const environmentPath = endpointUrl.pathname.slice(0, markerIndex);
+    const regionalUrl = new URL(
+      `${environmentPath}/powervirtualagents/regionalchannelsettings`,
+      endpointUrl.origin,
+    );
+    regionalUrl.searchParams.set("api-version", apiVersion);
+    return regionalUrl.toString();
+  } catch {
+    return null;
+  }
+};
+
+const extractDirectLineDomain = (rawValue: unknown): string | null => {
+  if (!rawValue || typeof rawValue !== "object") {
+    return null;
+  }
+
+  const byId = (rawValue as { channelUrlsById?: unknown }).channelUrlsById;
+  if (!byId || typeof byId !== "object") {
+    return null;
+  }
+
+  const directlineValue = (byId as { directline?: unknown }).directline;
+  if (typeof directlineValue !== "string" || !directlineValue.trim()) {
+    return null;
+  }
+
+  const normalizedBase = directlineValue.trim().replace(/\/+$/, "");
+  return `${normalizedBase}/v3/directline`;
+};
+
+async function resolveDirectLineDomain(tokenEndpoint: string): Promise<string | null> {
+  const regionalSettingsUrl = computeRegionalChannelSettingsUrl(tokenEndpoint);
+  if (!regionalSettingsUrl) {
+    return null;
+  }
+
+  try {
+    const response = await fetch(regionalSettingsUrl, {
+      method: "GET",
+      cache: "no-store",
+      headers: {
+        Accept: "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const json = (await response.json()) as unknown;
+    return extractDirectLineDomain(json);
+  } catch {
+    return null;
+  }
+}
+
 export async function POST() {
   const tokenEndpoint = process.env.COPILOT_TOKEN_ENDPOINT;
   if (!tokenEndpoint) {
@@ -69,7 +140,13 @@ export async function POST() {
     );
   }
 
-  return NextResponse.json(parsed.data, {
+  const directLineDomain = await resolveDirectLineDomain(tokenEndpoint);
+  const responsePayload = {
+    ...parsed.data,
+    ...(directLineDomain ? { directLineDomain } : {}),
+  };
+
+  return NextResponse.json(responsePayload, {
     status: 200,
     headers: {
       "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
