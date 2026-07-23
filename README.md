@@ -12,13 +12,12 @@ POC construida con Next.js (App Router), React y TypeScript estricto.
 - Vitest
 
 ## Caracteristicas de la fase 1
-- Panel de chat a la izquierda y panel de UI rica a la derecha.
-- En movil, el panel rico cae debajo del chat.
+- Panel de chat con UI rica inline para fechas, vuelos, grupo de viaje y camarote.
 - Flujo simulado con `MockAgentTransport` (sin Copilot Studio).
 - Selector de fechas de ida y vuelta.
 - Carrusel horizontal de vuelos simulados.
 - Contratos de eventos validados con Zod.
-- Endpoint placeholder `/api/copilot/token` con estado `501`.
+- Endpoint `/api/copilot/token` que valida y reenvía tokens de Copilot Studio cuando se configura.
 
 ## Estructura principal
 - `app/` interfaz y endpoint de token placeholder.

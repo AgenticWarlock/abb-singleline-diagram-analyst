@@ -6,7 +6,7 @@ La POC separa claramente UI, contrato de eventos y transporte del agente para po
 ## Capas
 - `app/`: composición principal de pantalla y endpoint placeholder.
 - `components/chat`: experiencia conversacional.
-- `components/travel`: UI rica (fechas + vuelos).
+- `components/travel`: UI rica inline en el chat (fechas, vuelos, grupo y camarote).
 - `lib/agent`: interfaz `AgentTransport`, implementaciones y contratos.
 - `lib/mock`: datos simulados de vuelos.
 - `tests/`: pruebas de contrato y transporte mock.
@@ -17,7 +17,7 @@ La POC separa claramente UI, contrato de eventos y transporte del agente para po
 3. El mock emite `ui.showDatePicker`.
 4. La UI confirma rango y emite `ui.datesSelected`.
 5. El mock emite `ui.showFlights` con datos simulados.
-6. El usuario selecciona vuelo y UI emite `ui.flightSelected`.
+6. El usuario selecciona vuelo en el carrusel inline y UI emite `ui.flightSelected`.
 7. El mock confirma en chat con `ui.showMessage`.
 
 ## Evolución a Fase 2

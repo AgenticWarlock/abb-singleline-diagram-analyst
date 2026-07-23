@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { Badge, BrandVariants, createLightTheme, FluentProvider, Text } from "@fluentui/react-components";
 import { ChatPanel } from "@/components/chat";
-import { TravelDateRangePicker } from "@/components/travel";
+import { FlightCarousel, TravelDateRangePicker } from "@/components/travel";
 import { TravelPartySelector } from "@/components/travel/party";
 import { CabinSelector } from "@/components/travel/cabins";
 import {
@@ -375,6 +375,12 @@ export default function Home() {
                     hasPets={hasPets}
                     onSelect={onSelectCabin}
                     disabled={isSendingCabinSelection}
+                  />
+                ) : flights.length > 0 ? (
+                  <FlightCarousel
+                    flights={flights}
+                    selectedFlightId={selectedFlightId}
+                    onSelectFlight={onSelectFlight}
                   />
                 ) : undefined
               }

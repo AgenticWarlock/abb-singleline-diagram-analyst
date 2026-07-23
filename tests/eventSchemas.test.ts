@@ -3,6 +3,7 @@ import {
   agentToUiEventSchema,
   showCabinSelectorActivityValueSchema,
   showDatePickerActivityValueSchema,
+  showFlightsActivityValueSchema,
   showTravelPartySelectorActivityValueSchema,
   uiToAgentEventSchema,
 } from "@/lib/agent/eventSchemas";
@@ -32,6 +33,25 @@ describe("eventSchemas", () => {
     };
 
     expect(() => agentToUiEventSchema.parse(event)).not.toThrow();
+  });
+
+  it("accepts a valid Direct Line ui.showFlights value", () => {
+    expect(() => showFlightsActivityValueSchema.parse({
+      destination: "Roma",
+      fromDate: "2026-10-12",
+      toDate: "2026-10-18",
+      flights: [{
+        id: "AZ-1",
+        airline: "ITA Airways",
+        origin: "MAD",
+        destination: "FCO",
+        departureTime: "08:00",
+        arrivalTime: "10:10",
+        duration: "2h 10m",
+        stops: 0,
+        priceEur: 199,
+      }],
+    })).not.toThrow();
   });
 
   it("rejects HTML in ui.showMessage", () => {

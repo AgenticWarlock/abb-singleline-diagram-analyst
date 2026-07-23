@@ -26,6 +26,13 @@ export const showDatePickerActivityValueSchema = z.object({
   mode: z.literal("range"),
 });
 
+export const showFlightsActivityValueSchema = z.object({
+  destination: z.string().min(1),
+  fromDate: z.string().date(),
+  toDate: z.string().date(),
+  flights: z.array(flightOptionSchema).min(1),
+});
+
 /**
  * Schema para validar el campo `value` de la actividad DirectLine
  * event / name === "ui.showTravelPartySelector".
@@ -117,5 +124,6 @@ export const uiToAgentEventSchema = z.discriminatedUnion("type", [
 export type AgentToUiEventSchema = z.infer<typeof agentToUiEventSchema>;
 export type UiToAgentEventSchema = z.infer<typeof uiToAgentEventSchema>;
 export type ShowDatePickerActivityValue = z.infer<typeof showDatePickerActivityValueSchema>;
+export type ShowFlightsActivityValue = z.infer<typeof showFlightsActivityValueSchema>;
 export type ShowTravelPartySelectorActivityValue = z.infer<typeof showTravelPartySelectorActivityValueSchema>;
 export type ShowCabinSelectorActivityValue = z.infer<typeof showCabinSelectorActivityValueSchema>;

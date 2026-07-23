@@ -1,14 +1,17 @@
 .button {
-  border: 0;
-  background: transparent;
-  min-width: 255px;
+  align-items: flex-start;
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  min-width: 100%;
+  min-height: 100%;
+  padding: 12px;
   text-align: left;
-  cursor: pointer;
 }
 
 .card {
+  min-width: 255px;
   display: grid;
-  gap: 8px;
   height: 100%;
   border-radius: 12px !important;
   border: 1px solid rgba(22, 35, 58, 0.11) !important;
@@ -29,22 +32,22 @@
   transition: transform 0.5s ease;
 }
 
-.button:hover .card {
+.card:hover {
   transform: translateY(-2px);
   border-color: rgba(47, 111, 176, 0.35) !important;
   box-shadow: 0 8px 16px rgba(20, 35, 55, 0.1) !important;
 }
 
-.button:hover .card::before {
+.card:hover::before {
   transform: translateX(110%);
 }
 
-.button:focus-visible .card {
+.button:focus-visible {
   outline: 2px solid #6ea2d3;
-  outline-offset: 1px;
+  outline-offset: -2px;
 }
 
-.selected .card {
+.selected {
   border: 2px solid #3d7fbe !important;
   box-shadow: 0 10px 20px rgba(47, 111, 176, 0.2) !important;
 }

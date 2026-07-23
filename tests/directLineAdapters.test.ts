@@ -4,6 +4,7 @@ import {
   isOwnUserMessage,
   mapDirectLineActivityToAgentEvent,
   mapDirectLineEventActivityToAgentEvent,
+  mapUiEventToDirectLineEvent,
 } from "@/lib/agent/directLineAdapters";
 
 describe("directLineAdapters", () => {
@@ -71,6 +72,35 @@ describe("directLineAdapters", () => {
   // --- mapDirectLineEventActivityToAgentEvent ---
 
   describe("mapDirectLineEventActivityToAgentEvent", () => {
+    it("maps a valid ui.showFlights event activity", () => {
+      const activity: Activity = {
+        type: "event",
+        name: "ui.showFlights",
+        from: { id: "nauta-bot", role: "bot" },
+        value: {
+          destination: "Roma",
+          fromDate: "2026-10-12",
+          toDate: "2026-10-18",
+          flights: [{
+            id: "AZ-1",
+            airline: "ITA Airways",
+            origin: "MAD",
+            destination: "FCO",
+            departureTime: "08:00",
+            arrivalTime: "10:10",
+            duration: "2h 10m",
+            stops: 0,
+            priceEur: 199,
+          }],
+        },
+      };
+
+      expect(mapDirectLineEventActivityToAgentEvent(activity)).toMatchObject({
+        type: "ui.showFlights",
+        payload: { destination: "Roma" },
+      });
+    });
+
     it("maps a valid ui.showDatePicker event activity", () => {
       const activity: Activity = {
         type: "event",
@@ -210,6 +240,16 @@ describe("directLineAdapters", () => {
       };
       const result = mapDirectLineEventActivityToAgentEvent(activity);
       expect(result?.type).toBe("ui.showCabinSelector");
+    });
+  });
+
+  it("maps ui.flightSelected to a Direct Line event", () => {
+    expect(mapUiEventToDirectLineEvent({
+      type: "ui.flightSelected",
+      payload: { flightId: "AZ-1" },
+    })).toEqual({
+      name: "ui.flightSelected",
+      value: { flightId: "AZ-1" },
     });
   });
 });

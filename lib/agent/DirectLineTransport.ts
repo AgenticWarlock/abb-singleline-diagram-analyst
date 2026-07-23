@@ -3,6 +3,7 @@ import { agentToUiEventSchema } from "@/lib/agent/eventSchemas";
 import {
   mapDirectLineActivityToAgentEvent,
   mapDirectLineEventActivityToAgentEvent,
+  mapUiEventToDirectLineEvent,
   isOwnUserMessage,
 } from "@/lib/agent/directLineAdapters";
 import { copilotTokenResponseSchema } from "@/lib/agent/tokenSchemas";
@@ -215,30 +216,7 @@ export class DirectLineTransport implements AgentTransport {
       throw new Error("DirectLineTransport is not connected.");
     }
 
-    let activityName: string;
-    let activityValue: unknown;
-
-    switch (event.type) {
-      case "ui.datesSelected":
-        activityName = "ui.datesSelected";
-        activityValue = {
-          departureDate: event.payload.fromDate,
-          returnDate: event.payload.toDate,
-          origin: event.payload.origin,
-          destination: event.payload.destination,
-        };
-        break;
-      case "ui.travelPartySelected":
-        activityName = "ui.travelPartySelected";
-        activityValue = event.payload;
-        break;
-      case "ui.cabinSelected":
-        activityName = "ui.cabinSelected";
-        activityValue = event.payload;
-        break;
-      default:
-        return;
-    }
+    const { name: activityName, value: activityValue } = mapUiEventToDirectLineEvent(event);
 
     if (process.env.NODE_ENV === "development") {
       console.log(`[DirectLineTransport] Sending event: ${activityName}`, activityValue);
@@ -255,7 +233,7 @@ export class DirectLineTransport implements AgentTransport {
     if (activityName === "ui.cabinSelected") {
       console.debug("[ui.cabinSelected]", {
         type: activity.type,
-        name: activity.name,
+        name: activityName,
         value: event.payload,
       });
     }

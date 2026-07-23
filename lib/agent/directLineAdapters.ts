@@ -1,7 +1,8 @@
 import type { Activity } from "botframework-directlinejs";
-import type { AgentToUiEvent } from "@/lib/agent/eventTypes";
+import type { AgentToUiEvent, UiToAgentEvent } from "@/lib/agent/eventTypes";
 import {
   showDatePickerActivityValueSchema,
+  showFlightsActivityValueSchema,
   showTravelPartySelectorActivityValueSchema,
   showCabinSelectorActivityValueSchema,
 } from "@/lib/agent/eventSchemas";
@@ -52,6 +53,32 @@ export const mapDirectLineActivityToAgentEvent = (
       text: truncateText(text),
     },
   };
+};
+
+export interface DirectLineEventPayload {
+  name: string;
+  value: unknown;
+}
+
+export const mapUiEventToDirectLineEvent = (
+  event: UiToAgentEvent,
+): DirectLineEventPayload => {
+  switch (event.type) {
+    case "ui.datesSelected":
+      return {
+        name: event.type,
+        value: {
+          departureDate: event.payload.fromDate,
+          returnDate: event.payload.toDate,
+          origin: event.payload.origin,
+          destination: event.payload.destination,
+        },
+      };
+    case "ui.flightSelected":
+    case "ui.travelPartySelected":
+    case "ui.cabinSelected":
+      return { name: event.type, value: event.payload };
+  }
 };
 
 /**
@@ -123,6 +150,21 @@ export const mapDirectLineEventActivityToAgentEvent = (
         mode: parsed.data.mode,
       },
     };
+  }
+
+  if (eventName === "ui.showFlights") {
+    const rawValue = parseActivityValue(activity.value);
+    if (rawValue === undefined) return null;
+    const parsed = showFlightsActivityValueSchema.safeParse(rawValue);
+    if (!parsed.success) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("[directLineAdapters] ui.showFlights validation failed", {
+          issues: parsed.error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`),
+        });
+      }
+      return null;
+    }
+    return { type: "ui.showFlights", payload: parsed.data };
   }
 
   if (eventName === "ui.showTravelPartySelector") {

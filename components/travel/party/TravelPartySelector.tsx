@@ -47,9 +47,9 @@ export function TravelPartySelector({ config, onConfirm, disabled = false }: Tra
         <Caption1 className={styles.label}>Número de pasajeros</Caption1>
         <div className={styles.buttonGroup} role="group" aria-label="Número de pasajeros">
           {passengerOptions.map((n) => (
-            <button
+            <Button
               key={n}
-              type="button"
+              appearance="secondary"
               className={`${styles.optionBtn} ${passengers === n ? styles.selected : ""}`}
               onClick={() => setPassengers(n)}
               disabled={disabled}
@@ -57,7 +57,7 @@ export function TravelPartySelector({ config, onConfirm, disabled = false }: Tra
               aria-label={`${n} ${n === 1 ? "pasajero" : "pasajeros"}`}
             >
               {n}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
@@ -67,8 +67,8 @@ export function TravelPartySelector({ config, onConfirm, disabled = false }: Tra
         <div className={styles.section}>
           <Caption1 className={styles.label}>¿Viajas con mascota?</Caption1>
           <div className={styles.buttonGroup} role="group" aria-label="Mascota">
-            <button
-              type="button"
+            <Button
+              appearance="secondary"
               className={`${styles.petBtn} ${hasPets === true ? styles.selected : ""}`}
               onClick={() => setHasPets(true)}
               disabled={disabled}
@@ -76,16 +76,16 @@ export function TravelPartySelector({ config, onConfirm, disabled = false }: Tra
             >
               <AnimalDog24Regular />
               Sí, llevo mascota
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              appearance="secondary"
               className={`${styles.petBtn} ${hasPets === false ? styles.selected : ""}`}
               onClick={() => setHasPets(false)}
               disabled={disabled}
               aria-pressed={hasPets === false}
             >
               No
-            </button>
+            </Button>
           </div>
         </div>
       )}
