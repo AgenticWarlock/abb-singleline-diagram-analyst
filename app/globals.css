@@ -1,17 +1,25 @@
 @import "react-day-picker/dist/style.css";
 
 :root {
-  --brand-ink: #182435;
-  --brand-line: #d5deea;
-  --brand-muted: #6c7d93;
-  --brand-soft: #eef3f9;
-  --background: #f5f7fb;
+  --abb-red: #ff0000;
+  --abb-red-hover: #d60000;
+  --abb-red-subtle: #fff0f0;
+  --abb-black: #0a0a0a;
+  --abb-ink-muted: #4d4d4d;
+  --abb-gray-10: #f5f5f5;
+  --abb-gray-30: #d1d1d1;
+  --abb-gray-50: #a6a6a6;
+  --abb-focus: #0067b1;
+  --brand-ink: var(--abb-black);
+  --brand-line: var(--abb-gray-30);
+  --brand-muted: var(--abb-ink-muted);
+  --brand-soft: var(--abb-red-subtle);
+  --background: var(--abb-gray-10);
   --surface: #ffffff;
-  --foreground: #182435;
-  --accent: #2f6fb0;
-  --accent-soft: #ecf3fb;
-  --accent-aqua: #5fc7c8;
-  --shadow-soft: 0 10px 28px rgba(22, 38, 60, 0.1);
+  --foreground: var(--abb-black);
+  --accent: var(--abb-red);
+  --accent-soft: var(--abb-red-subtle);
+  --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 html {
@@ -29,55 +37,10 @@ body {
   display: flex;
   flex-direction: column;
   color: var(--foreground);
-  background:
-    linear-gradient(90deg, rgba(25, 40, 62, 0.02) 1px, transparent 1px) 0 0/46px 46px,
-    linear-gradient(rgba(25, 40, 62, 0.016) 1px, transparent 1px) 0 0/46px 46px,
-    var(--background);
-  font-family: var(--font-geist-sans), "Segoe UI", sans-serif;
+  background: var(--background);
+  font-family: "Segoe UI", "Segoe UI Web", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  position: relative;
-}
-
-body::before,
-body::after {
-  content: "";
-  position: fixed;
-  pointer-events: none;
-  border-radius: 999px;
-  filter: blur(42px);
-  z-index: -1;
-  opacity: 0.55;
-}
-
-body::before {
-  width: 380px;
-  height: 380px;
-  top: -120px;
-  left: -90px;
-  background: radial-gradient(circle at 35% 35%, rgba(95, 199, 200, 0.34) 0%, rgba(95, 199, 200, 0.04) 70%);
-  animation: ambientFloatA 18s ease-in-out infinite;
-}
-
-body::after {
-  width: 440px;
-  height: 440px;
-  right: -120px;
-  bottom: -180px;
-  background: radial-gradient(circle at 65% 45%, rgba(92, 145, 201, 0.28) 0%, rgba(92, 145, 201, 0.04) 72%);
-  animation: ambientFloatB 22s ease-in-out infinite;
-}
-
-@keyframes ambientFloatA {
-  0%,
-  100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(18px, 16px) scale(1.04); }
-}
-
-@keyframes ambientFloatB {
-  0%,
-  100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(-16px, -14px) scale(1.05); }
 }
 
 main {

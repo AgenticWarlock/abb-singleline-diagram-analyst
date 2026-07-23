@@ -47,7 +47,7 @@ export function ChatComposer({ onSend, disabled = false }: ChatComposerProps) {
         style={{ gridColumn: "1 / 2", gridRow: "2" }}
       />
       <Button
-        appearance="secondary"
+        appearance="primary"
         icon={<Send24Regular />}
         onClick={handleSend}
         disabled={disabled}

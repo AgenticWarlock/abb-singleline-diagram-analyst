@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import React from "react";
 import { Body1Strong, Card } from "@fluentui/react-components";
+import { Bot24Regular } from "@fluentui/react-icons";
 import type { ChatMessageModel } from "@/lib/agent/eventTypes";
 import { ChatMessage } from "./ChatMessage";
 import { ChatComposer } from "./ChatComposer";
@@ -71,9 +72,11 @@ export function ChatPanel({ messages, isBusy, inputDisabled, onSendMessage, inli
       >
         {messages.length === 0 && (
           <div className={styles.emptyState}>
-            <span className={styles.emptyIcon}>⚓</span>
+            <span className={styles.emptyIcon} aria-hidden="true">
+              <Bot24Regular />
+            </span>
             <Body1Strong className={styles.emptyText}>
-              ¡Hola! Soy tu Nauta de reservas.
+              Asistente de reservas ABB
             </Body1Strong>
             <span className={styles.emptySub}>
               Cuéntame a dónde quieres viajar.
@@ -90,7 +93,7 @@ export function ChatPanel({ messages, isBusy, inputDisabled, onSendMessage, inli
               <span className={styles.dot} />
               <span className={styles.dot} />
             </div>
-            <span className={styles.typingLabel}>Nauta de reservas está escribiendo…</span>
+            <span className={styles.typingLabel}>El asistente está escribiendo…</span>
           </div>
         )}
         {inlineContent && (

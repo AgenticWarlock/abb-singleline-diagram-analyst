@@ -142,13 +142,13 @@
 }
 
 .thumb:hover {
-  border-color: #7ca9d7;
+  border-color: var(--abb-gray-50);
   transform: translateY(-1px);
 }
 
 .thumbActive {
-  border-color: #8ab2db;
-  box-shadow: 0 0 0 2px rgba(138, 178, 219, 0.45);
+  border-color: var(--abb-red);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--abb-red), transparent 55%);
 }
 
 @media (prefers-reduced-motion: reduce) {

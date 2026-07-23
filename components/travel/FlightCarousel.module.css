@@ -29,5 +29,5 @@
 }
 
 .list::-webkit-scrollbar-thumb:hover {
-  background: rgba(47, 111, 176, 0.35);
+  background: color-mix(in srgb, var(--abb-red), transparent 65%);
 }

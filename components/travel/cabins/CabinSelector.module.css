@@ -17,11 +17,11 @@
 }
 
 .headerIcon {
-  color: #4b87c2;
+  color: var(--abb-red);
 }
 
 .headerText {
-  color: #1f3048;
+  color: var(--abb-black);
   font-weight: 600;
 }
 

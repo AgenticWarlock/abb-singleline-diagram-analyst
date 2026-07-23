@@ -1,26 +1,14 @@
 .card {
   display: grid;
   gap: 12px;
-  border-radius: 14px !important;
-  box-shadow: 0 6px 16px rgba(22, 38, 60, 0.09) !important;
-  border: 1px solid rgba(22, 35, 58, 0.1) !important;
+  border-radius: 4px !important;
+  box-shadow: var(--shadow-soft) !important;
+  border: 1px solid var(--abb-gray-30) !important;
   padding: 16px !important;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  background: var(--surface);
   position: relative;
   overflow: hidden;
   animation: pickerIn 0.3s ease-out;
-}
-
-.card::after {
-  content: "";
-  position: absolute;
-  width: 140px;
-  height: 140px;
-  top: -54px;
-  right: -58px;
-  border-radius: 50%;
-  background: radial-gradient(circle at center, rgba(118, 179, 217, 0.25), rgba(118, 179, 217, 0.02) 70%);
-  pointer-events: none;
 }
 
 @keyframes pickerIn {
@@ -35,7 +23,7 @@
 }
 
 .shipIcon {
-  color: #4b87c2;
+  color: var(--abb-red);
   flex-shrink: 0;
   margin-top: 2px;
   font-size: 20px;
@@ -44,21 +32,21 @@
 .route {
   display: block;
   font-size: 15px !important;
-  color: #1c2b42;
+  color: var(--abb-black);
 }
 
 .hint {
   display: block;
-  color: #70839c;
+  color: var(--abb-ink-muted);
   margin-top: 2px;
 }
 
 .picker {
-  border: 1px solid #d7e1ec;
-  border-radius: 10px;
+  border: 1px solid var(--abb-gray-30);
+  border-radius: 4px;
   padding: 10px;
   overflow-x: auto;
-  background: #f9fbfe;
+  background: var(--abb-gray-10);
   transition: border-color 0.16s ease, box-shadow 0.16s ease;
 }
 
@@ -84,22 +72,14 @@
 }
 
 .picker:hover {
-  border-color: #c5d7ea;
-  box-shadow: 0 6px 14px rgba(40, 73, 111, 0.08);
+  border-color: var(--abb-gray-50);
+  box-shadow: none;
 }
 
 /* Fluent-style primary button override */
 .confirmBtn {
   justify-self: stretch;
-  border-radius: 10px !important;
-  border: 1px solid #2f6fb0 !important;
-  background: linear-gradient(180deg, #3d7fbe, #2f6fb0) !important;
-}
-
-.confirmBtn:hover {
-  background: linear-gradient(180deg, #4b8bc9, #3a79b7) !important;
-  transform: translateY(-1px);
-  box-shadow: 0 8px 16px rgba(47, 111, 176, 0.24);
+  border-radius: 4px !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

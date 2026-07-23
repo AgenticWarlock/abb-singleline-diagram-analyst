@@ -18,13 +18,13 @@ import {
 import { cabinCatalog } from "@/lib/mocks";
 import styles from "./page.module.css";
 
-const trasmedBrand: BrandVariants = {
-  10: "#020c1f", 20: "#061636", 30: "#0a2050", 40: "#0d2a6a", 50: "#103485",
-  60: "#143fa0", 70: "#1a4fbe", 80: "#1a4a9e", 90: "#2a5abc", 100: "#3a6acc",
-  110: "#5080d8", 120: "#6a96e2", 130: "#84aaec", 140: "#9ebff4",
-  150: "#bad3f8", 160: "#d6e7fc",
+const abbBrand: BrandVariants = {
+  10: "#2A0000", 20: "#450000", 30: "#600000", 40: "#7A0000", 50: "#940000",
+  60: "#AE0000", 70: "#C70000", 80: "#D60000", 90: "#E60000", 100: "#FF0000",
+  110: "#FF3333", 120: "#FF5C5C", 130: "#FF8585", 140: "#FFA3A3",
+  150: "#FFC2C2", 160: "#FFE0E0",
 };
-const trasmedTheme = createLightTheme(trasmedBrand);
+const abbTheme = createLightTheme(abbBrand);
 
 const statusLabels: Record<AgentConnectionStatus, string> = {
   online: "Conectado",
@@ -319,15 +319,14 @@ export default function Home() {
   };
 
   return (
-    <FluentProvider theme={trasmedTheme}>
+    <FluentProvider theme={abbTheme}>
       <div className={styles.page}>
         <header className={styles.header}>
-          <div className={styles.headerWaves} aria-hidden="true" />
-          <div className={styles.headerBoat} aria-hidden="true" />
           <div className={styles.headerBrand}>
-            <span className={styles.headerLogo}>⚓</span>
-            <div>
-              <Text className={styles.headerTitle}>Asistente de Reservas + Copilot Studio Direct Line (directline)</Text>
+            <span className={styles.headerLogo}>ABB</span>
+            <div className={styles.headerCopy}>
+              <Text className={styles.headerTitle}>Asistente de reservas</Text>
+              <Text className={styles.headerSub}>Copilot Studio Direct Line</Text>
             </div>
           </div>
           <Badge

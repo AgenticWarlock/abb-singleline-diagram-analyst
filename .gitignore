@@ -12,7 +12,7 @@
 
 # testing
 /coverage
-playwright-home.png
+playwright-*.png
 
 # next.js
 /.next/

@@ -1,8 +1,8 @@
 .message {
   max-width: 80%;
-  border-radius: 16px;
+  border-radius: 4px;
   padding: 11px 14px;
-  box-shadow: 0 3px 10px rgba(20, 35, 55, 0.06);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   line-height: 1.45;
   word-break: break-word;
   animation: bubbleIn 0.26s ease-out;
@@ -63,13 +63,12 @@
   background: transparent;
 }
 
-/* User bubble - navy Trasmed */
 .user {
   margin-left: auto;
-  background: linear-gradient(165deg, #4e8ec9 0%, #2f6fb0 78%);
+  background: var(--abb-red);
   color: #ffffff;
   border-bottom-right-radius: 4px;
-  box-shadow: 0 7px 16px rgba(47, 111, 176, 0.22);
+  box-shadow: none;
 }
 
 .user .role {
@@ -80,32 +79,30 @@
   background: rgba(255, 255, 255, 0.15);
 }
 
-/* Agent bubble - white with navy accent */
 .agent {
   margin-right: auto;
-  background: #ffffff;
-  border: 1px solid rgba(21, 36, 57, 0.1);
-  color: #1c2b42;
+  background: var(--surface);
+  border: 1px solid var(--abb-gray-30);
+  color: var(--abb-black);
   border-bottom-left-radius: 4px;
 }
 
 .agent:hover {
-  border-color: rgba(60, 111, 170, 0.3);
-  box-shadow: 0 6px 14px rgba(20, 35, 55, 0.1);
+  border-color: var(--abb-gray-50);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
 .agent .role {
-  color: #4f6f93;
+  color: var(--abb-ink-muted);
 }
 
-/* System bubble - compact structured confirmation */
 .system {
   align-self: flex-end;
   margin-left: auto;
-  background: linear-gradient(180deg, #eff5fc, #e8f0fb);
-  border: 1px solid #c8d9ec;
-  color: #264867;
-  border-radius: 12px;
+  background: var(--abb-red-subtle);
+  border: 1px solid color-mix(in srgb, var(--abb-red), transparent 70%);
+  color: var(--abb-black);
+  border-radius: 4px;
   font-size: 12px;
   padding: 8px 11px;
   box-shadow: none;
@@ -114,7 +111,7 @@
 
 .system .role {
   margin-bottom: 4px;
-  color: #3f648c;
+  color: var(--abb-ink-muted);
 }
 
 @media (prefers-reduced-motion: reduce) {
