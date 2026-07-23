@@ -184,6 +184,8 @@
 .emptySub {
   font-size: 13px;
   color: var(--abb-ink-muted);
+  max-width: 54ch;
+  line-height: 1.5;
 }
 
 /* Contenido rico inline (date picker, etc.) */

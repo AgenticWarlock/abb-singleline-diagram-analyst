@@ -13,7 +13,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
     message.role === "user"
       ? "Tú"
       : message.role === "agent"
-        ? "Agente"
+        ? message.authorName?.trim() || "Agente"
         : "Sistema";
 
   return (

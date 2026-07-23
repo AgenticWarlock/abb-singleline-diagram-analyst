@@ -80,6 +80,7 @@ export const agentToUiEventSchema = z.discriminatedUnion("type", [
         .min(1)
         .max(MAX_AGENT_MESSAGE_LENGTH)
         .refine(noHtml, "Agent messages cannot contain HTML."),
+      authorName: z.string().min(1).optional(),
     }),
   }),
   z.object({

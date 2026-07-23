@@ -51,6 +51,7 @@ export const mapDirectLineActivityToAgentEvent = (
     type: "ui.showMessage",
     payload: {
       text: truncateText(text),
+      authorName: activity.from?.name?.trim() || undefined,
     },
   };
 };

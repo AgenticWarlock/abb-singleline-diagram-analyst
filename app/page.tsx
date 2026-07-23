@@ -1,22 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import type { DateRange } from "react-day-picker";
+import { useEffect, useRef, useState } from "react";
 import { Badge, BrandVariants, createLightTheme, FluentProvider, Text } from "@fluentui/react-components";
 import { ChatPanel } from "@/components/chat";
-import { FlightCarousel, TravelDateRangePicker } from "@/components/travel";
-import { TravelPartySelector } from "@/components/travel/party";
-import { CabinSelector } from "@/components/travel/cabins";
 import {
   createAgentTransport,
   type AgentConnectionStatus,
   type AgentTransport,
   type ChatMessageModel,
-  type FlightOption,
-  type ShowTravelPartySelectorPayload,
 } from "@/lib/agent";
-import { cabinCatalog } from "@/lib/mocks";
 import styles from "./page.module.css";
+
+const BYTES_IN_MB = 1024 * 1024;
 
 const abbBrand: BrandVariants = {
   10: "#2A0000", 20: "#450000", 30: "#600000", 40: "#7A0000", 50: "#940000",
@@ -28,29 +23,62 @@ const abbTheme = createLightTheme(abbBrand);
 
 const statusLabels: Record<AgentConnectionStatus, string> = {
   online: "Conectado",
-  connecting: "Conectando…",
-  reconnecting: "Reconectando…",
+  connecting: "Conectando...",
+  reconnecting: "Reconectando...",
   disconnected: "Desconectado",
-  expired: "Sesión expirada",
+  expired: "Sesion expirada",
   failed: "Error",
+};
+
+const defaultAgentDisplayName = process.env.NEXT_PUBLIC_AGENT_DISPLAY_NAME?.trim() || "Agente";
+const defaultAgentSubtitle =
+  process.env.NEXT_PUBLIC_AGENT_SUBTITLE?.trim() || "Copilot Studio · mensajes, imagenes y PDF";
+const defaultAgentDescription =
+  process.env.NEXT_PUBLIC_AGENT_DESCRIPTION?.trim() ||
+  "Asistente conversacional para analizar diagramas, imagenes y documentos PDF.";
+const defaultChatEmptyTitle =
+  process.env.NEXT_PUBLIC_AGENT_EMPTY_TITLE?.trim() || "AISA\nAI-powered SLD Analyzer";
+
+const formatFileSize = (sizeInBytes: number): string => {
+  if (sizeInBytes < 1024) {
+    return `${sizeInBytes} B`;
+  }
+
+  if (sizeInBytes < BYTES_IN_MB) {
+    return `${(sizeInBytes / 1024).toFixed(1)} KB`;
+  }
+
+  return `${(sizeInBytes / BYTES_IN_MB).toFixed(2)} MB`;
 };
 
 const createMessage = (
   role: ChatMessageModel["role"],
   text: string,
+  authorName?: string,
 ): ChatMessageModel => ({
   id: crypto.randomUUID(),
   role,
   text,
   timestamp: new Date().toISOString(),
+  authorName,
 });
 
-const formatLocalIsoDate = (date: Date): string => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+const formatAttachmentKind = (file: File): string => {
+  if (file.type.startsWith("image/")) {
+    return "imagen";
+  }
+
+  if (file.type === "application/pdf") {
+    return "PDF";
+  }
+
+  return "archivo";
 };
+
+const buildAttachmentSummary = (attachments: File[]): string =>
+  attachments
+    .map((file) => `- ${file.name} (${formatAttachmentKind(file)}, ${formatFileSize(file.size)})`)
+    .join("\n");
 
 export default function Home() {
   const transportRef = useRef<AgentTransport | null>(null);
@@ -58,26 +86,8 @@ export default function Home() {
   const [messages, setMessages] = useState<ChatMessageModel[]>([]);
   const [isBusy, setIsBusy] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<AgentConnectionStatus>("disconnected");
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [panelLoading, setPanelLoading] = useState(false);
   const [panelError, setPanelError] = useState<string | null>(null);
-  const [origin, setOrigin] = useState("");
-  const [destination, setDestination] = useState("");
-  const [dateHint, setDateHint] = useState<string | undefined>(undefined);
-  const [minDate, setMinDate] = useState<string | undefined>(undefined);
-  const [dateRange, setDateRange] = useState<DateRange | undefined>();
-  const [selectedFlightId, setSelectedFlightId] = useState<string | undefined>();
-  const [flights, setFlights] = useState<FlightOption[]>([]);
-  // Travel party state
-  const [showPartySelector, setShowPartySelector] = useState(false);
-  const [partyConfig, setPartyConfig] = useState<ShowTravelPartySelectorPayload | null>(null);
-  const [passengers, setPassengers] = useState<number>(1);
-  const [hasPets, setHasPets] = useState<boolean>(false);
-  // Cabin state
-  const [showCabinSelector, setShowCabinSelector] = useState(false);
-  const [cabinId, setCabinId] = useState<string | null>(null);
-  const [isSendingCabinSelection, setIsSendingCabinSelection] = useState(false);
-  const [sentCabinSelectionId, setSentCabinSelectionId] = useState<string | null>(null);
+  const [agentDisplayName, setAgentDisplayName] = useState(defaultAgentDisplayName);
 
   const appendMessage = (message: ChatMessageModel) => {
     setMessages((prev) => [...prev, message]);
@@ -96,50 +106,20 @@ export default function Home() {
     transportRef.current = transport;
 
     const unsubscribe = transport.subscribe((event) => {
-      // Cualquier evento del agente desbloquea el chat
       releaseBusy();
 
       if (event.type === "ui.showMessage") {
-        appendMessage(createMessage("agent", event.payload.text));
-      }
+        const nextAgentName = event.payload.authorName?.trim();
+        if (nextAgentName) {
+          setAgentDisplayName(nextAgentName);
+        }
 
-      if (event.type === "ui.showDatePicker") {
-        setOrigin(event.payload.origin ?? "");
-        setDestination(event.payload.destination);
-        setDateHint(event.payload.hint);
-        setMinDate(event.payload.minDate);
-        setShowDatePicker(true);
-        setDateRange(undefined);
-        setPanelLoading(false);
-        setPanelError(null);
-      }
-
-      if (event.type === "ui.showFlights") {
-        setFlights(event.payload.flights);
-        setPanelLoading(false);
-      }
-
-      if (event.type === "ui.showTravelPartySelector") {
-        setPartyConfig(event.payload);
-        setShowPartySelector(true);
-        setShowDatePicker(false);
-        setShowCabinSelector(false);
-        setPanelError(null);
-      }
-
-      if (event.type === "ui.showCabinSelector") {
-        setCabinId(event.payload.cabinId);
-        setShowCabinSelector(true);
-        setSentCabinSelectionId(null);
-        setShowPartySelector(false);
-        setShowDatePicker(false);
-        setPanelError(null);
+        appendMessage(createMessage("agent", event.payload.text, nextAgentName));
       }
     });
 
     const unsubscribeStatus = transport.subscribeConnectionStatus((status) => {
       setConnectionStatus(status);
-      // Si la conexión cae mientras esperamos respuesta, desbloqueamos
       if (status === "disconnected" || status === "failed") {
         releaseBusy();
       }
@@ -156,165 +136,39 @@ export default function Home() {
     };
   }, []);
 
-  const onSendMessage = async (text: string) => {
+  const onSendMessage = async (text: string, attachments: File[]) => {
     if (connectionStatus !== "online") {
       return;
     }
 
-    appendMessage(createMessage("user", text));
+    const trimmed = text.trim();
+    if (!trimmed && attachments.length === 0) {
+      return;
+    }
+
+    const prompt = trimmed || "Analiza los adjuntos compartidos.";
+    const attachmentSummary = attachments.length > 0 ? buildAttachmentSummary(attachments) : "";
+    const userMessage = attachmentSummary
+      ? `${prompt}\n\n**Adjuntos**\n${attachmentSummary}`
+      : prompt;
+    const transportMessage = attachmentSummary
+      ? `${prompt}\n\nAdjuntos del usuario:\n${attachmentSummary}\n\nResponde en espanol con un analisis breve y siguientes pasos.`
+      : prompt;
+
+    appendMessage(createMessage("user", userMessage));
     setPanelError(null);
     setIsBusy(true);
 
-    // Red de seguridad: si el agente no responde en 20s, desbloqueamos
     busyTimeoutRef.current = setTimeout(() => {
       setIsBusy(false);
       busyTimeoutRef.current = null;
     }, 20_000);
 
     try {
-      await transportRef.current?.sendMessage(text);
+      await transportRef.current?.sendMessage(transportMessage);
     } catch {
       setPanelError("No fue posible procesar tu mensaje.");
       releaseBusy();
-    }
-  };
-
-  const formattedRange = useMemo(() => {
-    if (!dateRange?.from || !dateRange?.to) {
-      return null;
-    }
-
-    return {
-      fromDate: formatLocalIsoDate(dateRange.from),
-      toDate: formatLocalIsoDate(dateRange.to),
-    };
-  }, [dateRange]);
-
-  // Helper: formatea ISO YYYY-MM-DD a "18 jul 2026"
-  const fmtDate = (iso: string) => {
-    const months = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
-    const [y, m, d] = iso.split("-").map(Number);
-    return `${d} ${months[m - 1]} ${y}`;
-  };
-
-  const onConfirmDates = async () => {
-    if (!formattedRange) {
-      setPanelError("Debes elegir fecha de ida y vuelta.");
-      return;
-    }
-
-    setPanelLoading(true);
-    setPanelError(null);
-    setFlights([]);
-    setSelectedFlightId(undefined);
-
-    try {
-      await transportRef.current?.sendEvent({
-        type: "ui.datesSelected",
-        payload: {
-          origin,
-          destination,
-          fromDate: formattedRange.fromDate,
-          toDate: formattedRange.toDate,
-        },
-      });
-      setShowDatePicker(false);
-      appendMessage(createMessage("system",
-        `📅 Fechas: ${origin ? `${origin} → ` : ""}${destination} · ${fmtDate(formattedRange.fromDate)} – ${fmtDate(formattedRange.toDate)}`
-      ));
-    } catch {
-      setPanelLoading(false);
-      setPanelError("No fue posible recuperar vuelos para el rango seleccionado.");
-    }
-  };
-
-  const onConfirmParty = async (selectedPassengers: number, selectedHasPets: boolean) => {
-    setPassengers(selectedPassengers);
-    setHasPets(selectedHasPets);
-    setShowPartySelector(false);
-    setPanelError(null);
-
-    try {
-      await transportRef.current?.sendEvent({
-        type: "ui.travelPartySelected",
-        payload: { passengers: selectedPassengers, hasPets: selectedHasPets },
-      });
-      appendMessage(createMessage("system",
-        `👥 ${selectedPassengers} ${selectedPassengers === 1 ? "pasajero" : "pasajeros"}${
-          selectedHasPets ? " · con mascota 🐾" : ""
-        }`
-      ));
-    } catch {
-      setPanelError("No fue posible enviar la selección de pasajeros.");
-    }
-  };
-
-  const onSelectCabin = async (selectedCabinId: string) => {
-    if (isSendingCabinSelection || sentCabinSelectionId === selectedCabinId) {
-      return;
-    }
-
-    const cabin = cabinCatalog[selectedCabinId];
-    if (!cabin) return;
-
-    setPanelError(null);
-    setIsSendingCabinSelection(true);
-
-    // 1) Update the UI first with a local selection card aligned to the right.
-    appendMessage(
-      createMessage(
-        "system",
-        `### Tu seleccion\n- Camarote: ${cabin.name}\n- Cubierta: ${cabin.deck}\n- Precio: +${cabin.priceDelta} EUR\n- Pet friendly: ${cabin.petFriendly ? "Si" : "No"}`,
-      ),
-    );
-
-    const summaryInput = [
-      origin && `Origen: ${origin}`,
-      destination && `Destino: ${destination}`,
-      formattedRange && `Fechas: ${fmtDate(formattedRange.fromDate)} - ${fmtDate(formattedRange.toDate)}`,
-      `Pasajeros: ${passengers}`,
-      `Mascota: ${hasPets ? "Si" : "No"}`,
-      `Camarote: ${cabin.name}`,
-      cabin.deck && `Cubierta: ${cabin.deck}`,
-      `Suplemento: +${cabin.priceDelta} EUR`,
-    ]
-      .filter(Boolean)
-      .join(". ");
-
-    try {
-      await transportRef.current?.sendEvent({
-        type: "ui.cabinSelected",
-        payload: summaryInput,
-      });
-
-      setSentCabinSelectionId(selectedCabinId);
-      setShowCabinSelector(false);
-    } catch {
-      setPanelError("No se pudo enviar la seleccion del camarote. Intentalo de nuevo.");
-      appendMessage(
-        createMessage(
-          "system",
-          "No se pudo enviar la seleccion al agente. Vuelve a intentarlo.",
-        ),
-      );
-    } finally {
-      setIsSendingCabinSelection(false);
-    }
-  };
-
-  const onSelectFlight = async (flightId: string) => {
-    setSelectedFlightId(flightId);
-    setPanelError(null);
-
-    try {
-      await transportRef.current?.sendEvent({
-        type: "ui.flightSelected",
-        payload: {
-          flightId,
-        },
-      });
-    } catch {
-      setPanelError("No fue posible registrar la selección del vuelo.");
     }
   };
 
@@ -325,8 +179,8 @@ export default function Home() {
           <div className={styles.headerBrand}>
             <span className={styles.headerLogo}>ABB</span>
             <div className={styles.headerCopy}>
-              <Text className={styles.headerTitle}>Asistente de reservas</Text>
-              <Text className={styles.headerSub}>Copilot Studio Direct Line</Text>
+              <Text className={styles.headerTitle}>{agentDisplayName}</Text>
+              <Text className={styles.headerSub}>{defaultAgentSubtitle}</Text>
             </div>
           </div>
           <Badge
@@ -347,44 +201,11 @@ export default function Home() {
               isBusy={isBusy}
               onSendMessage={onSendMessage}
               inputDisabled={connectionStatus !== "online"}
-              inlineContent={
-                showDatePicker ? (
-                  <>
-                    <TravelDateRangePicker
-                      origin={origin || undefined}
-                      destination={destination}
-                      hint={dateHint}
-                      minDate={minDate}
-                      range={dateRange}
-                      onRangeChange={setDateRange}
-                      onConfirm={onConfirmDates}
-                      disabled={panelLoading}
-                    />
-                    {panelError && <p className={styles.panelError}>{panelError}</p>}
-                  </>
-                ) : showPartySelector && partyConfig ? (
-                  <TravelPartySelector
-                    config={partyConfig}
-                    onConfirm={onConfirmParty}
-                  />
-                ) : showCabinSelector && cabinId ? (
-                  <CabinSelector
-                    cabinId={cabinId}
-                    passengers={passengers}
-                    hasPets={hasPets}
-                    onSelect={onSelectCabin}
-                    disabled={isSendingCabinSelection}
-                  />
-                ) : flights.length > 0 ? (
-                  <FlightCarousel
-                    flights={flights}
-                    selectedFlightId={selectedFlightId}
-                    onSelectFlight={onSelectFlight}
-                  />
-                ) : undefined
-              }
+              emptyTitle={defaultChatEmptyTitle}
+              emptyDescription={defaultAgentDescription}
             />
           </section>
+          {panelError ? <p className={styles.panelError}>{panelError}</p> : null}
         </main>
       </div>
     </FluentProvider>

@@ -1,32 +1,20 @@
-# copilotstudiorichui
+# ABB Team Hub
 
-## Nauta de reservas - POC Agencia de Viajes con Agente IA
+Interfaz base construida con Next.js (App Router), React y TypeScript estricto.
 
-POC construida con Next.js (App Router), React y TypeScript estricto.
+El objetivo actual es ofrecer un frontal limpio para el equipo de ABB donde poder adjuntar imagenes y documentos PDF como punto de entrada.
+
+## Alcance actual
+- Pantalla principal orientada a "punto de contacto ABB".
+- Chat tradicional para conversar con el agente.
+- Adjuntos de imagenes y PDF desde el compositor.
+- Conexion principal por Direct Line con Copilot Studio.
+- `MockAgentTransport` disponible solo como fallback explicito para desarrollo.
 
 ## Stack
 - Next.js + React + TypeScript
-- Fluent UI React Components
-- react-day-picker
-- Zod
+- Fluent UI (disponible para futuras integraciones)
 - Vitest
-
-## Caracteristicas de la fase 1
-- Panel de chat con UI rica inline para fechas, vuelos, grupo de viaje y camarote.
-- Flujo simulado con `MockAgentTransport` (sin Copilot Studio).
-- Selector de fechas de ida y vuelta.
-- Carrusel horizontal de vuelos simulados.
-- Contratos de eventos validados con Zod.
-- Endpoint `/api/copilot/token` que valida y reenvía tokens de Copilot Studio cuando se configura.
-
-## Estructura principal
-- `app/` interfaz y endpoint de token placeholder.
-- `components/chat/` componentes del chat.
-- `components/travel/` componentes de UI rica.
-- `lib/agent/` transporte, tipos y esquemas de eventos.
-- `lib/mocks/` datos simulados.
-- `docs/` arquitectura y contrato de eventos.
-- `tests/` pruebas unitarias.
 
 ## Comandos
 ```bash
@@ -34,37 +22,37 @@ npm install
 npm run dev
 ```
 
-Abre `http://localhost:3000`.
+Abrir en `http://localhost:3000`.
 
-### Calidad
+## Calidad
 ```bash
 npm run lint
 npm run test
 npm run build
 ```
 
-## Notas
-- No hay autenticacion en esta fase.
-- No hay Direct Line real en esta fase.
-- No se usan APIs reales de vuelos.
+## Configuracion de transporte
 
-## Conexion con Nauta (Copilot Studio via Direct Line)
+Por defecto la app intenta conectar por Direct Line.
 
-Crear `.env.local` con:
+Configurar `.env.local` con:
 
 ```bash
 COPILOT_TOKEN_ENDPOINT=<TOKEN ENDPOINT DE COPILOT STUDIO>
-NEXT_PUBLIC_AGENT_TRANSPORT=directline
+NEXT_PUBLIC_AGENT_AUTO_START_CONVERSATION=true
+NEXT_PUBLIC_AGENT_START_EVENT_NAME=startConversation
+NEXT_PUBLIC_AGENT_DISPLAY_NAME=AISA
+NEXT_PUBLIC_AGENT_SUBTITLE=AI-powered SLD Analyzer
+NEXT_PUBLIC_AGENT_DESCRIPTION=Analiza diagramas unifilares, imagenes y PDF para detectar incidencias y resumir hallazgos.
 ```
 
-Luego ejecutar:
-
-```bash
-npm run dev
-```
-
-Para volver al transporte simulado:
+Opcionalmente, para forzar el mock en desarrollo:
 
 ```bash
 NEXT_PUBLIC_AGENT_TRANSPORT=mock
 ```
+
+## Siguientes evoluciones sugeridas
+- Persistir adjuntos en almacenamiento (Azure Blob, SharePoint o similar).
+- Añadir envio de metadatos (proyecto, equipo, prioridad, notas).
+- Conectar estos adjuntos a un flujo de analisis con agente.

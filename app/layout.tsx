@@ -1,10 +1,17 @@
 import type { Metadata } from "next";
+import { Sora } from "next/font/google";
 import { FluentStyleRegistry } from "./FluentStyleRegistry";
 import "./globals.css";
 
+const sora = Sora({
+  subsets: ["latin"],
+  variable: "--font-sora",
+  weight: ["400", "600", "700"],
+});
+
 export const metadata: Metadata = {
-  title: "ABB | Asistente de reservas",
-  description: "POC de asistente de reservas con interfaz rica",
+  title: "ABB | Punto de contacto",
+  description: "Interfaz para adjuntar imagenes y PDFs para el equipo ABB",
 };
 
 export default function RootLayout({
@@ -14,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body>
+      <body className={sora.variable}>
         <FluentStyleRegistry>{children}</FluentStyleRegistry>
       </body>
     </html>

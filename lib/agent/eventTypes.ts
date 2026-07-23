@@ -40,6 +40,7 @@ export interface ShowFlightsPayload {
 
 export interface ShowMessagePayload {
   text: string;
+  authorName?: string;
 }
 
 export interface ShowTravelPartySelectorPayload {
@@ -89,4 +90,5 @@ export interface ChatMessageModel {
   role: "user" | "agent" | "system";
   text: string;
   timestamp: string;
+  authorName?: string;
 }

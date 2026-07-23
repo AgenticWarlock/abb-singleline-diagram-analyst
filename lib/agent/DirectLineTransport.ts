@@ -16,6 +16,19 @@ import type {
 import type { UiToAgentEvent } from "./eventTypes";
 
 const DEFAULT_DIRECT_LINE_DOMAIN = "https://europe.directline.botframework.com/v3/directline";
+const DEFAULT_START_EVENT_NAME = "startConversation";
+
+const shouldAutoStartConversation = (): boolean => {
+  const rawValue = process.env.NEXT_PUBLIC_AGENT_AUTO_START_CONVERSATION?.trim().toLowerCase();
+  if (!rawValue) {
+    return true;
+  }
+
+  return rawValue !== "false" && rawValue !== "0" && rawValue !== "off";
+};
+
+const getConversationStartEventName = (): string =>
+  process.env.NEXT_PUBLIC_AGENT_START_EVENT_NAME?.trim() || DEFAULT_START_EVENT_NAME;
 
 export class DirectLineTransport implements AgentTransport {
   private directLine: DirectLine | null = null;
@@ -29,6 +42,7 @@ export class DirectLineTransport implements AgentTransport {
   private connectedReady = false;
   private reconnecting = false;
   private localClientActivityIds = new Set<string>();
+  private hasSentAutoStartEvent = false;
 
   async connect(): Promise<void> {
     await this.initializeDirectLine();
@@ -54,6 +68,7 @@ export class DirectLineTransport implements AgentTransport {
     const json = await response.json();
     const tokenPayload = copilotTokenResponseSchema.parse(json);
     this.lastConversationId = tokenPayload.conversationId;
+    this.hasSentAutoStartEvent = false;
     const directLineDomain =
       process.env.NEXT_PUBLIC_DIRECT_LINE_DOMAIN?.trim() || DEFAULT_DIRECT_LINE_DOMAIN;
 
@@ -107,6 +122,12 @@ export class DirectLineTransport implements AgentTransport {
             clearTimeout(timeoutId);
             this.connectedReady = true;
             waitSubscription?.unsubscribe();
+            this.sendAutoStartConversationEvent().then(
+              () => undefined,
+              (error: unknown) => {
+                this.logDirectLineError("autoStartConversation", error);
+              },
+            );
             resolve();
           }
 
@@ -283,10 +304,52 @@ export class DirectLineTransport implements AgentTransport {
     this.emitConnectionStatus("disconnected");
     this.lastConversationId = null;
     this.connectedReady = false;
+    this.hasSentAutoStartEvent = false;
     this.localClientActivityIds.clear();
     this.listeners.clear();
     this.statusListeners.clear();
     return;
+  }
+
+  private async sendAutoStartConversationEvent(): Promise<void> {
+    if (!shouldAutoStartConversation()) {
+      return;
+    }
+
+    if (!this.directLine || !this.connectedReady || this.connectionStatus !== "online") {
+      return;
+    }
+
+    if (this.hasSentAutoStartEvent) {
+      return;
+    }
+
+    this.hasSentAutoStartEvent = true;
+
+    const activity = {
+      type: "event",
+      name: getConversationStartEventName(),
+      from: { id: this.userId, name: "Usuario", role: "user" },
+      value: {},
+      locale: "es-ES",
+      channelData: {
+        postBack: true,
+      },
+    } as Activity;
+
+    await new Promise<void>((resolve, reject) => {
+      const subscription = this.directLine?.postActivity(activity).subscribe({
+        next: () => {
+          subscription?.unsubscribe();
+          resolve();
+        },
+        error: (error: unknown) => {
+          this.hasSentAutoStartEvent = false;
+          subscription?.unsubscribe();
+          reject(error);
+        },
+      });
+    });
   }
 
   private emitConnectionStatus(status: AgentConnectionStatus): void {

@@ -13,12 +13,22 @@ interface ChatPanelProps {
   messages: ChatMessageModel[];
   isBusy: boolean;
   inputDisabled: boolean;
-  onSendMessage: (text: string) => Promise<void>;
+  onSendMessage: (text: string, attachments: File[]) => Promise<void>;
+  emptyTitle?: string;
+  emptyDescription?: string;
   /** Contenido rico opcional que se renderiza inline al final de los mensajes */
   inlineContent?: React.ReactNode;
 }
 
-export function ChatPanel({ messages, isBusy, inputDisabled, onSendMessage, inlineContent }: ChatPanelProps) {
+export function ChatPanel({
+  messages,
+  isBusy,
+  inputDisabled,
+  onSendMessage,
+  emptyTitle = "Asistente de analisis ABB",
+  emptyDescription = "Escribe tu consulta y adjunta imagenes o PDF para analizarlos.",
+  inlineContent,
+}: ChatPanelProps) {
   const messagesContainerRef = useRef<HTMLElement>(null);
   const inlineContentRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -76,10 +86,10 @@ export function ChatPanel({ messages, isBusy, inputDisabled, onSendMessage, inli
               <Bot24Regular />
             </span>
             <Body1Strong className={styles.emptyText}>
-              Asistente de reservas ABB
+              {emptyTitle}
             </Body1Strong>
             <span className={styles.emptySub}>
-              Cuéntame a dónde quieres viajar.
+              {emptyDescription}
             </span>
           </div>
         )}

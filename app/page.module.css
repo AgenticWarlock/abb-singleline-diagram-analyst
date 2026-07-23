@@ -37,7 +37,7 @@
 
 .headerCopy {
   display: grid;
-  gap: 2px;
+  gap: 3px;
 }
 
 .headerTitle {
@@ -49,6 +49,14 @@
 .headerSub {
   color: #d1d1d1;
   font-size: 12px;
+  font-weight: 700;
+}
+
+.headerDescription {
+  color: #b8b8b8;
+  font-size: 12px;
+  line-height: 1.35;
+  max-width: 52ch;
 }
 
 .statusBadge {
@@ -79,12 +87,6 @@
 .chatPanel {
   min-height: 640px;
   height: clamp(640px, calc(100dvh - 170px), 980px);
-}
-
-.datePickerPanel {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
 }
 
 .panelError {
